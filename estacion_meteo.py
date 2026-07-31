@@ -154,7 +154,7 @@ def process_data(raw_data):
     return df, station_name
 
 # --- SIDEBAR & REGLAS DE TIEMPO ---
-st.sidebar.image("https://meteo.tech/demos/saas-2/images/logo.png", width="stretch")
+st.sidebar.image("https://meteo.tech/demos/saas-2/images/logo.png", use_container_width=True)
 st.sidebar.title("🎛️ Configuración")
 
 station_id = st.sidebar.text_input("ID de la Estación", value="234424088")
