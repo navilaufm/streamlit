@@ -574,7 +574,7 @@ with tab2:
         st.divider()
 
         st.download_button(
-            label=f"📥 Descargar Serie Temporal {frecuencia} (CSV)",
+            label=f"📥 Descargar Serie de datos {frecuencia} (CSV)",
             data=df_precip.to_csv(index=False).encode('utf-8'),
             file_name=f"precipitacion_{frecuencia.lower()}_hybas_{cuenca_info['hybas_id'] if cuenca_info else 'cuenca'}.csv",
             mime="text/csv"
@@ -758,8 +758,8 @@ with tab3:
 
     st.divider()
 
-    # 4. Hietograma Interactivo de Pronóstico SAT
-    st.markdown("### 📈 Hietograma de Pronóstico SAT vs. Umbrales de Cuenca")
+    # 4. Historiograma Interactivo de Pronóstico SAT
+    st.markdown("### 📈 Histograma de Pronóstico SAT vs. Umbrales de Cuenca")
     
     df_sat['Acumulada_Cuenca'] = df_sat['Lluvia_Cuenca_mm'].cumsum()
     
@@ -808,7 +808,7 @@ with tab3:
         fig_sat.add_hline(y=p99_sat, line_dash="dash", line_color="#dc3545", annotation_text=f"P99 Roja: {p99_sat:.1f} mm")
 
     fig_sat.update_layout(
-        title=f"Hietograma de Pronóstico a 6 Días (ICON) - HYBAS_ID: {cuenca_info['hybas_id'] if cuenca_info else 'N/A'}",
+        title=f"Histograma de Pronóstico a 6 Días (ICON) - HYBAS_ID: {cuenca_info['hybas_id'] if cuenca_info else 'N/A'}",
         xaxis_title="Horizonte de Pronóstico",
         template="plotly_white",
         height=450,
@@ -886,7 +886,7 @@ with tab3:
         box-shadow: 0 4px 12px rgba(0,0,0,0.25);
     ">
         <div style="margin-bottom: 4px;">
-            <span style="font-weight:bold; color: #111;">📡 Radar Meteorológico (mm/24h)</span>
+            <span style="font-weight:bold; color: #111;">Pronóstico de Lluvia de cada día (mm/24h)</span>
             <div style="background: linear-gradient(to right, #00e5ff, #0044ff, #00e600, #ffff00, #ff9900, #ff0000, #cc00cc); height: 12px; border-radius: 4px; margin-top: 4px;"></div>
             <div style="display: flex; justify-content: space-between; font-size: 9px; color: #222; margin-top: 3px; font-weight: bold;">
                 <span>0</span>
@@ -925,5 +925,6 @@ with tab3:
 
 # Pie de página y margen de scroll inferior
 st.markdown("---")
-st.caption("🌊 *Portal Climatológico & Analizador de Cuencas con Google Earth Engine, Folium, Rasterio & Streamlit*")
+st.caption("*Portal Climatológico & Analizador de Cuencas con Google Earth Engine, Folium, Rasterio & Streamlit*")
+st.caption("*CATIE Maestría de Gestión de Cuencas Hidrográficas 2026 - Curso Integración Tecnológica - Prof. Norman Avila 2026*")
 st.markdown("<div style='height: 160px;'></div>", unsafe_allow_html=True)
