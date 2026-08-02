@@ -712,7 +712,7 @@ with tab_info:
 st.markdown("---")
 st.markdown(
     '<div style="text-align: center; color: #94A3B8; font-size: 0.85rem;">'
-    'Fuente de datos: SNET / CVTAS El Salvador &bull; API GeoJSON &bull; Monitoreo Hidrometeorológico'
+    'Fuente: CRRH - CVTAS. Más información en <a href="https://recursoshidricos.org/" target="_blank" style="color: #3B82F6; text-decoration: underline;">https://recursoshidricos.org/</a>'
     '</div>',
     unsafe_allow_html=True
 )
