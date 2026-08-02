@@ -228,7 +228,8 @@ with col_head1:
     st.image("https://img1.wsimg.com/isteam/ip/7df7d502-f608-4f42-96e5-594268ea23ec/CRRH-SICA%20.png", width=250)
 with col_head2:
     st.markdown('<div class="main-header">🌧️ Monitor de Índice Estandarizado de Precipitación (SPI)</div>', unsafe_allow_html=True)
-    st.markdown(f'<div class="sub-header">Análisis geoespacial y meteorológico de sequía para <b>{collection_props.get("month_name", "")} {collection_props.get("period", "")}</b></div>', unsafe_allow_html=True)
+    station_str = f" &bull; Estación Seleccionada: <b style='color: #2563EB;'>{selected_station_name}</b>" if selected_station_name else ""
+    st.markdown(f'<div class="sub-header">Análisis geoespacial y meteorológico de sequía para <b>{collection_props.get("month_name", "")} {collection_props.get("period", "")}</b>{station_str}</div>', unsafe_allow_html=True)
 
 # ---------------------------------------------------------
 # Main Tabs
