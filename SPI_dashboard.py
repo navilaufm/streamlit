@@ -233,12 +233,13 @@ with col_head2:
 # ---------------------------------------------------------
 # Main Tabs
 # ---------------------------------------------------------
-tab_map, tab_detail, tab_compare, tab_multi_month, tab_table = st.tabs([
+tab_map, tab_detail, tab_compare, tab_multi_month, tab_table, tab_info = st.tabs([
     "🗺️ Mapa & Resumen General",
     "🔍 Detalle por Estación",
     "📊 Comparativa del Mes",
     "📈 Evolución Multi-Mes",
-    "📋 Tabla de Datos & Exportación"
+    "📋 Tabla de Datos & Exportación",
+    "ℹ️ Metodología & SAT Sequía"
 ])
 
 # =========================================================
@@ -326,12 +327,12 @@ with tab_map:
         
         st.markdown("#### Leyenda del Semáforo SPI")
         legend_html = """
-        <div style="font-size: 0.85rem; line-height: 1.8;">
-            <span style="color: #8B0000; font-weight: bold;">🔴 #8B0000:</span> Sequía Extrema (SPI &le; -2.0)<br>
-            <span style="color: #FF0000; font-weight: bold;">🔴 #FF0000:</span> Sequía Severa (-1.99 a -1.50)<br>
-            <span style="color: #FFA500; font-weight: bold;">🟠 #FFA500:</span> Sequía Moderada (-1.49 a -1.00)<br>
-            <span style="color: #FFFF00; font-weight: bold;">🟡 #FFFF00:</span> Sequía Débil (-0.99 a -0.50)<br>
-            <span style="color: #2E7D32; font-weight: bold;">🟢 #2E7D32:</span> Normal / Húmedo (SPI &gt; -0.50)
+        <div style="font-size: 0.9rem; line-height: 2.0;">
+            <span style="font-size: 1.1rem;">🔴</span> <b style="color: #8B0000;">Sequía Extrema</b> (SPI &le; -2.0)<br>
+            <span style="font-size: 1.1rem;">🔴</span> <b style="color: #DC2626;">Sequía Severa</b> (-1.99 a -1.50)<br>
+            <span style="font-size: 1.1rem;">🟠</span> <b style="color: #D97706;">Sequía Moderada</b> (-1.49 a -1.00)<br>
+            <span style="font-size: 1.1rem;">🟡</span> <b style="color: #CA8A04;">Sequía Débil</b> (-0.99 a -0.50)<br>
+            <span style="font-size: 1.1rem;">🟢</span> <b style="color: #16A34A;">Normal / Húmedo</b> (SPI &gt; -0.50)
         </div>
         """
         st.markdown(legend_html, unsafe_allow_html=True)
@@ -613,6 +614,97 @@ with tab_table:
                 mime="application/geo+json",
                 use_container_width=True
             )
+
+# =========================================================
+# TAB 6: METODOLOGÍA & SAT SEQUÍA
+# =========================================================
+with tab_info:
+    st.subheader("ℹ️ Metodología y Sistema de Alerta Temprana (SAT) por Sequía")
+    st.markdown("Información metodológica simplificada sobre el **Índice de Precipitación Estandarizada (SPI)** adaptado para la región por el CRRH.")
+    
+    st.markdown("---")
+    
+    col_info1, col_info2 = st.columns([1.1, 1])
+    
+    with col_info1:
+        st.markdown("### 📌 ¿Qué es el SPI?")
+        st.info(
+            "El **Índice de Precipitación Estandarizada (SPI)** es el indicador climático utilizado para detectar y caracterizar deficiencias de lluvia. "
+            "Su función principal es comparar la lluvia registrada en un periodo específico con el promedio histórico de ese mismo lugar, "
+            "permitiendo identificar estadísticamente qué tan anormal es la falta de agua."
+        )
+        
+        st.markdown("### 🧮 ¿Cómo se calcula? (La Fórmula)")
+        st.latex(r"SPI = \frac{P - PN}{\sigma}")
+        st.markdown(r"""
+        - **$P$ (Precipitación):** Lluvia total acumulada en el mes o periodo actual.
+        - **$PN$ (Precipitación Normal):** Promedio histórico de lluvia para esa ubicación y mes específico.
+        - **$\sigma$ (Desviación Estándar):** Medida de variabilidad histórica habitual de la lluvia en la zona.
+        """)
+        
+        st.markdown("### 🎯 ¿Para qué sirve esta información?")
+        st.success(
+            "Este índice funciona como un **indicador de verificación** que confirma la ocurrencia de una sequía. "
+            "Es una herramienta esencial para que autoridades y productores agrícolas puedan tomar acciones preventivas "
+            "(como entrega de semillas, gestión de seguros paramétricos o auxilio) antes de que los impactos en las cosechas sean irreversibles."
+        )
+
+    with col_info2:
+        st.markdown("### 🚦 Niveles de Alerta y Categorías de Sequía")
+        
+        table_html = """
+        <table style="width:100%; border-collapse: collapse; font-size: 0.9rem; text-align: left;">
+            <thead>
+                <tr style="border-bottom: 2px solid #CBD5E1;">
+                    <th style="padding: 8px;">Valor SPI</th>
+                    <th style="padding: 8px;">Categoría Sequía</th>
+                    <th style="padding: 8px;">Alerta SAT</th>
+                    <th style="padding: 8px; text-align: center;">Nivel</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr style="border-bottom: 1px solid #E2E8F0;">
+                    <td style="padding: 8px;"><b>&gt; -0.5</b></td>
+                    <td>Condiciones Normales</td>
+                    <td><b>Vigilancia</b></td>
+                    <td style="text-align: center;"><span style="background-color:#16A34A; color:white; padding:3px 10px; border-radius:12px; font-weight:bold;">Verde</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #E2E8F0;">
+                    <td style="padding: 8px;"><b>-0.5 a -1.0</b></td>
+                    <td>Sequía Débil</td>
+                    <td><b>Preaviso</b></td>
+                    <td style="text-align: center;"><span style="background-color:#CA8A04; color:white; padding:3px 10px; border-radius:12px; font-weight:bold;">Amarillo</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #E2E8F0;">
+                    <td style="padding: 8px;"><b>-1.1 a -1.5</b></td>
+                    <td>Sequía Moderada</td>
+                    <td><b>Aviso</b></td>
+                    <td style="text-align: center;"><span style="background-color:#D97706; color:white; padding:3px 10px; border-radius:12px; font-weight:bold;">Naranja</span></td>
+                </tr>
+                <tr style="border-bottom: 1px solid #E2E8F0;">
+                    <td style="padding: 8px;"><b>-1.6 a -2.0</b></td>
+                    <td>Sequía Severa</td>
+                    <td><b>Alerta</b></td>
+                    <td style="text-align: center;"><span style="background-color:#DC2626; color:white; padding:3px 10px; border-radius:12px; font-weight:bold;">Rojo</span></td>
+                </tr>
+                <tr>
+                    <td style="padding: 8px;"><b>&lt; -2.0</b></td>
+                    <td>Sequía Extrema</td>
+                    <td><b>Emergencia</b></td>
+                    <td style="text-align: center;"><span style="background-color:#7E22CE; color:white; padding:3px 10px; border-radius:12px; font-weight:bold;">Púrpura</span></td>
+                </tr>
+            </tbody>
+        </table>
+        """
+        st.markdown(table_html, unsafe_allow_html=True)
+        
+        st.markdown("<br>", unsafe_allow_html=True)
+        st.markdown("### 🛡️ Metodología del SAT por Sequía")
+        st.markdown("""
+        1. **Uso de Datos Reales:** A diferencia de estimaciones satelitales (que suelen sobreestimar lluvia y retrasar alertas), este sistema prioriza datos de **estaciones meteorológicas reales** en terreno para obtener precisión científica.
+        2. **Vigilancia de Meses Críticos:** Se presta especial atención a los meses de **junio, julio y agosto** (período de la Canícula), vitales para la agricultura de subsistencia regional.
+        3. **Automatización de Avisos:** Al caer la lluvia registrada por debajo de umbrales definidos, el sistema genera automáticamente notificaciones. Si la lluvia se normaliza, la alerta se desactiva.
+        """)
 
 # ---------------------------------------------------------
 # Footer
