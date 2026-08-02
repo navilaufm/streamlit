@@ -102,29 +102,36 @@ period_options = {
 # ---------------------------------------------------------
 with st.sidebar:
     st.title("⚙️ Filtros y Control")
-    
     st.markdown("---")
     
-    # Period Selector Dropdown
+    # Station Selector Container (Rendered first at top of sidebar)
+    station_container = st.container()
+    st.markdown("---")
+    
+    # Period Selector Container (Rendered second)
+    period_container = st.container()
+
+with period_container:
     selected_period_label = st.selectbox(
         "📅 Seleccionar Mes / Período:",
         options=list(period_options.keys()),
         index=max(0, len(period_options) - 2) if len(period_options) > 1 else 0  # Default to recent period
     )
+
+selected_file = period_options[selected_period_label]
+target_geojson_url = BASE_URL + selected_file
+
+# Load selected period data
+try:
+    geojson_raw = load_geojson_data(target_geojson_url)
+except Exception as e:
+    st.error(f"Error al cargar GeoJSON para {selected_period_label}: {e}")
+    st.stop()
     
-    selected_file = period_options[selected_period_label]
-    target_geojson_url = BASE_URL + selected_file
-    
-    # Load selected period data
-    try:
-        geojson_raw = load_geojson_data(target_geojson_url)
-    except Exception as e:
-        st.error(f"Error al cargar GeoJSON para {selected_period_label}: {e}")
-        st.stop()
-        
-    collection_props = geojson_raw.get("properties", {})
-    features = geojson_raw.get("features", [])
-    
+collection_props = geojson_raw.get("properties", {})
+features = geojson_raw.get("features", [])
+
+with period_container:
     st.markdown(f"**Período Seleccionado:** {collection_props.get('month_name', '')} {collection_props.get('period', '')}")
     st.markdown(f"**Estaciones Monitoreadas:** {len(features)}")
     
@@ -135,86 +142,78 @@ with st.sidebar:
         except Exception:
             st.caption(f"Generado: {collection_props.get('generated_at')}")
 
-    st.markdown("---")
+# Parse GeoJSON into structured DataFrames
+stations_data = []
+daily_records = []
 
-    # Parse GeoJSON into structured DataFrames
-    stations_data = []
-    daily_records = []
-
-    for f in features:
-        coords = f.get("geometry", {}).get("coordinates", [0, 0])
-        lon, lat = coords[0], coords[1]
-        p = f.get("properties", {})
-        m = p.get("metadata", {})
-        
-        station_id = p.get("station_id", "")
-        station_name = p.get("station_name", "Sin Nombre")
-        spi = p.get("spi", 0.0)
-        alert_level = p.get("alert_level", "Normal")
-        marker_color = p.get("marker_color", "#808080")
-        
-        rainfall_mm = m.get("rainfall_mm", 0.0)
-        ref_mean = m.get("ref_mean_pn", 0.0)
-        ref_std = m.get("ref_std_sigma", 0.0)
-        total_days = m.get("total_days", 0)
-        valid_days = m.get("valid_days", 0)
-        missing_days = m.get("missing_days", 0)
-        rainy_days = m.get("rainy_days", 0)
-        dry_days = m.get("dry_days", 0)
-        
-        pct_deficit = ((ref_mean - rainfall_mm) / ref_mean * 100) if ref_mean > 0 else 0
-        
-        stations_data.append({
+for f in features:
+    coords = f.get("geometry", {}).get("coordinates", [0, 0])
+    lon, lat = coords[0], coords[1]
+    p = f.get("properties", {})
+    m = p.get("metadata", {})
+    
+    station_id = p.get("station_id", "")
+    station_name = p.get("station_name", "Sin Nombre")
+    spi = p.get("spi", 0.0)
+    alert_level = p.get("alert_level", "Normal")
+    marker_color = p.get("marker_color", "#808080")
+    
+    rainfall_mm = m.get("rainfall_mm", 0.0)
+    ref_mean = m.get("ref_mean_pn", 0.0)
+    ref_std = m.get("ref_std_sigma", 0.0)
+    total_days = m.get("total_days", 0)
+    valid_days = m.get("valid_days", 0)
+    missing_days = m.get("missing_days", 0)
+    rainy_days = m.get("rainy_days", 0)
+    dry_days = m.get("dry_days", 0)
+    
+    pct_deficit = ((ref_mean - rainfall_mm) / ref_mean * 100) if ref_mean > 0 else 0
+    
+    stations_data.append({
+        "station_id": station_id,
+        "station_name": station_name,
+        "source_id": p.get("source_id", ""),
+        "source_station_id": p.get("source_station_id", ""),
+        "lat": lat,
+        "lon": lon,
+        "spi": spi,
+        "alert_level": alert_level,
+        "marker_color": marker_color,
+        "rainfall_mm": rainfall_mm,
+        "ref_mean_pn": ref_mean,
+        "ref_std_sigma": ref_std,
+        "total_days": total_days,
+        "valid_days": valid_days,
+        "missing_days": missing_days,
+        "missing_percentage": m.get("missing_percentage", 0),
+        "rainy_days": rainy_days,
+        "dry_days": dry_days,
+        "pct_deficit": pct_deficit
+    })
+    
+    for d in m.get("daily_data", []):
+        daily_records.append({
             "station_id": station_id,
             "station_name": station_name,
-            "source_id": p.get("source_id", ""),
-            "source_station_id": p.get("source_station_id", ""),
-            "lat": lat,
-            "lon": lon,
-            "spi": spi,
-            "alert_level": alert_level,
-            "marker_color": marker_color,
-            "rainfall_mm": rainfall_mm,
-            "ref_mean_pn": ref_mean,
-            "ref_std_sigma": ref_std,
-            "total_days": total_days,
-            "valid_days": valid_days,
-            "missing_days": missing_days,
-            "missing_percentage": m.get("missing_percentage", 0),
-            "rainy_days": rainy_days,
-            "dry_days": dry_days,
-            "pct_deficit": pct_deficit
+            "date": d.get("date"),
+            "total_mm": d.get("total_mm", 0.0),
+            "has_data": d.get("has_data", True)
         })
-        
-        for d in m.get("daily_data", []):
-            daily_records.append({
-                "station_id": station_id,
-                "station_name": station_name,
-                "date": d.get("date"),
-                "total_mm": d.get("total_mm", 0.0),
-                "has_data": d.get("has_data", True)
-            })
 
-    df_stations = pd.DataFrame(stations_data)
-    df_daily = pd.DataFrame(daily_records)
-    
-    # Alert Level Multiselect
-    available_alerts = list(df_stations["alert_level"].unique()) if not df_stations.empty else []
-    selected_alerts = st.multiselect(
-        "Filtrar por Nivel de Alerta:",
-        options=available_alerts,
-        default=available_alerts
-    )
-    
-    # Filter Stations
-    df_filtered = df_stations[df_stations["alert_level"].isin(selected_alerts)]
-    
-    # Station dropdown
+df_stations = pd.DataFrame(stations_data)
+df_daily = pd.DataFrame(daily_records)
+
+# Show all stations directly without filtering
+df_filtered = df_stations
+
+# Render Station Dropdown FIRST in station_container at top of sidebar
+with station_container:
     selected_station_name = st.selectbox(
-        "Seleccionar Estación para Detalle:",
-        options=df_filtered["station_name"].tolist() if not df_filtered.empty else df_stations["station_name"].tolist()
+        "📍 Seleccionar Estación:",
+        options=df_stations["station_name"].tolist() if not df_stations.empty else []
     )
-    
+
+with st.sidebar:
     st.markdown("---")
     if st.button("🔄 Recargar Todos los Datos", use_container_width=True):
         st.cache_data.clear()
@@ -231,15 +230,15 @@ with col_head2:
     station_str = f" &bull; Estación Seleccionada: <b style='color: #2563EB;'>{selected_station_name}</b>" if selected_station_name else ""
     st.markdown(f'<div class="sub-header">Análisis geoespacial y meteorológico de sequía para <b>{collection_props.get("month_name", "")} {collection_props.get("period", "")}</b>{station_str}</div>', unsafe_allow_html=True)
 
-# ---------------------------------------------------------
-# Main Tabs
-# ---------------------------------------------------------
-tab_map, tab_detail, tab_compare, tab_multi_month, tab_table, tab_info = st.tabs([
+# Dynamic tab title for selected station
+detail_tab_title = f"📍 Detalle Estación {selected_station_name}" if selected_station_name else "📍 Detalle por Estación"
+
+tab_map, tab_compare, tab_multi_month, tab_table, tab_detail, tab_info = st.tabs([
     "🗺️ Mapa & Resumen General",
-    "🔍 Detalle por Estación",
     "📊 Comparativa del Mes",
     "📈 Evolución Multi-Mes",
-    "📋 Tabla de Datos & Exportación",
+    "📋 Tabla Global de Datos",
+    detail_tab_title,
     "ℹ️ Metodología & SAT Sequía"
 ])
 
@@ -342,6 +341,7 @@ with tab_map:
 # TAB 2: DETALLE POR ESTACIÓN
 # =========================================================
 with tab_detail:
+    st.info("💡 **Vista Individual de Estación:** Esta pestaña muestra de forma exclusiva los datos meteorológicos y la serie diaria de la estación seleccionada en la barra lateral. Las pestañas anteriores muestran comparativas globales de toda la red.")
     if selected_station_name and not df_stations.empty:
         st_row = df_stations[df_stations["station_name"] == selected_station_name].iloc[0]
         
