@@ -41,7 +41,7 @@ components.html("""
 </script>
 """, height=0, width=0)
 
-# Estilos CSS personalizados para estética premium, eliminación del espacio superior y tema oscuro unificado
+# Estilos CSS adaptables que soportan TANTO Tema Oscuro (Dark) como Tema Claro (Light)
 st.markdown("""
 <style>
     /* 1. Eliminación del espacio superior muerto (Header Padding) */
@@ -56,24 +56,60 @@ st.markdown("""
         padding-right: 2rem !important;
         max-width: 98% !important;
     }
-    
-    /* 2. Tema Oscuro Unificado (Contenedor Principal y Sidebar) */
-    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
-        background-color: #0e1117 !important;
-        color: #ffffff !important;
+
+    /* 2. Definición de Variables de Tema (Oscuro por defecto, adaptable a Claro) */
+    :root {
+        --card-bg: linear-gradient(135deg, #1e222d 0%, #14171f 100%);
+        --card-border: #2e3440;
+        --card-title-color: #8f9ba8;
+        --card-val-color: #ffffff;
+        --forecast-card-bg: linear-gradient(135deg, #1a1e29 0%, #11141c 100%);
+        --forecast-detail-color: #8f9ba8;
     }
-    [data-testid="stSidebar"] {
-        background-color: #14171f !important;
-        border-right: 1px solid #2e3440 !important;
+
+    /* Reglas cuando el usuario o la app activan Tema Claro (Light Mode) */
+    @media (prefers-color-scheme: light) {
+        :root {
+            --card-bg: linear-gradient(135deg, #ffffff 0%, #f4f6f9 100%);
+            --card-border: #d0d7de;
+            --card-title-color: #57606a;
+            --card-val-color: #1f2328;
+            --forecast-card-bg: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%);
+            --forecast-detail-color: #57606a;
+        }
+    }
+
+    [data-theme="light"], .stApp[data-theme="light"], [data-testid="stAppViewContainer"][data-theme="light"] {
+        background-color: #f8f9fa !important;
+        color: #1f2328 !important;
+    }
+    
+    [data-theme="light"] .metric-card, .stApp[data-theme="light"] .metric-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f4f6f9 100%) !important;
+        border-color: #d0d7de !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06) !important;
+    }
+    [data-theme="light"] .metric-title, .stApp[data-theme="light"] .metric-title {
+        color: #57606a !important;
+    }
+    [data-theme="light"] .metric-value, .stApp[data-theme="light"] .metric-value {
+        color: #1f2328 !important;
+    }
+    [data-theme="light"] .forecast-card, .stApp[data-theme="light"] .forecast-card {
+        background: linear-gradient(135deg, #ffffff 0%, #f0f4f8 100%) !important;
+        border-color: #d0d7de !important;
+    }
+    [data-theme="light"] .forecast-detail, .stApp[data-theme="light"] .forecast-detail {
+        color: #57606a !important;
     }
     
     /* 3. Tarjetas de Métricas KPI */
     .metric-card {
-        background: linear-gradient(135deg, #1e222d 0%, #14171f 100%);
-        border: 1px solid #2e3440;
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
         border-radius: 12px;
         padding: 16px 20px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.25);
         margin-bottom: 12px;
         transition: transform 0.2s ease, border-color 0.2s ease;
     }
@@ -82,7 +118,7 @@ st.markdown("""
         border-color: #00e5ff;
     }
     .metric-title {
-        color: #8f9ba8;
+        color: var(--card-title-color);
         font-size: 0.85rem;
         font-weight: 600;
         text-transform: uppercase;
@@ -90,7 +126,7 @@ st.markdown("""
         margin-bottom: 6px;
     }
     .metric-value {
-        color: #ffffff;
+        color: var(--card-val-color);
         font-size: 1.8rem;
         font-weight: 700;
         line-height: 1.2;
@@ -121,11 +157,13 @@ st.markdown("""
         color: #ff3366;
         border: 1px solid #ff3366;
     }
+
+    /* 4. Tarjetas de Pronóstico 7 Días */
     .forecast-card {
-        background: linear-gradient(135deg, #1a1e29 0%, #11141c 100%);
-        border: 1px solid #2e3440;
+        background: var(--forecast-card-bg);
+        border: 1px solid var(--card-border);
         border-radius: 12px;
-        padding: 14px;
+        padding: 14px 10px;
         text-align: center;
         margin-bottom: 10px;
     }
@@ -135,18 +173,19 @@ st.markdown("""
     .forecast-day {
         color: #00e5ff;
         font-weight: 700;
-        font-size: 0.95rem;
+        font-size: 1.05rem;
         text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     .forecast-temp {
-        color: #ffffff;
-        font-size: 1.2rem;
+        font-size: 1.35rem;
         font-weight: 700;
         margin: 6px 0;
     }
     .forecast-detail {
-        color: #8f9ba8;
-        font-size: 0.78rem;
+        color: var(--forecast-detail-color);
+        font-size: 0.88rem;
+        line-height: 1.4;
     }
     .header-box {
         background: linear-gradient(90deg, #1a1e29 0%, #11141c 100%);
@@ -154,6 +193,36 @@ st.markdown("""
         border-radius: 14px;
         border-left: 5px solid #00e5ff;
         margin-bottom: 24px;
+    }
+
+    /* 5. Reglas Responsive para Dispositivos Móviles */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+        }
+        .metric-card {
+            padding: 12px 14px !important;
+        }
+        .metric-value {
+            font-size: 1.5rem !important;
+        }
+        .forecast-card {
+            padding: 16px 12px !important;
+            margin-bottom: 12px !important;
+        }
+        .forecast-day {
+            font-size: 1.1rem !important;
+        }
+        .forecast-temp {
+            font-size: 1.45rem !important;
+        }
+        .forecast-detail {
+            font-size: 0.92rem !important;
+        }
+        [data-testid="column"] {
+            min-width: 135px !important;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
@@ -169,7 +238,7 @@ elif phone_from_cookie and not st.session_state.get("user_phone"):
 
 clean_phone = "".join(filter(str.isdigit, str(st.session_state.get("user_phone", ""))))
 
-# PUENTE CLIENTE: Sincronizar Cookie + localStorage en el documento principal y auto-navegar si no hay URL param
+# PUENTE CLIENTE: Sincronizar Cookie + localStorage + Zona Horaria del Navegador en el documento principal
 js_sync_bridge = f"""
 <a id="autoNav" href="#" target="_top" style="display:none;"></a>
 <script>
@@ -183,6 +252,12 @@ js_sync_bridge = f"""
             let localPhone = topWin.localStorage.getItem('meteo_user_phone');
             let localStation = topWin.localStorage.getItem('meteo_station_id');
             let activePhone = '{clean_phone}';
+
+            // Captura de la Zona Horaria del Navegador (ej. America/Guatemala)
+            let browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            if (browserTz) {{
+                topDoc.cookie = "meteo_user_tz=" + browserTz + "; path=/; max-age=31536000; SameSite=Lax";
+            }}
 
             if (activePhone && activePhone.length > 0) {{
                 topDoc.cookie = "meteo_user_phone=" + activePhone + "; path=/; max-age=31536000; SameSite=Lax";
@@ -214,6 +289,28 @@ components.html(js_sync_bridge, height=0, width=0)
 DEFAULT_HEADERS = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
+
+# Conversor de timestamps UTC a Zona Horaria Local (Browser / Estación)
+def convert_utc_to_local(dt, target_tz_str=None):
+    """Convierte cualquier fecha/hora UTC a la zona horaria local del navegador o de la estación"""
+    if dt is None or pd.isna(dt):
+        return None
+    try:
+        ts = pd.to_datetime(dt)
+        if ts.tzinfo is None:
+            ts = ts.tz_localize("UTC")
+        else:
+            ts = ts.tz_convert("UTC")
+
+        browser_cookie_tz = st.context.cookies.get("meteo_user_tz", "") if hasattr(st, "context") and hasattr(st.context, "cookies") else ""
+        tz_name = target_tz_str or browser_cookie_tz or "America/Guatemala"
+
+        try:
+            return ts.tz_convert(tz_name)
+        except Exception:
+            return ts.tz_convert("America/Guatemala")
+    except Exception:
+        return dt
 
 # Función para convertir grados a dirección cardinal
 def get_cardinal_direction(degree):
@@ -388,6 +485,31 @@ if not clean_phone:
     st.sidebar.image("https://meteo.tech/demos/saas-2/images/logo.png", use_container_width=True)
     st.sidebar.title("🔐 Autenticación")
     st.sidebar.info("Ingresa tu número de teléfono para cargar tus estaciones meteorológicas.")
+
+    # Script para forzar teclado numérico (type='tel' e inputmode='numeric') en dispositivos móviles / PWA
+    js_numeric_keypad = """
+    <script>
+        (function() {
+            const enableNumericKeypad = () => {
+                try {
+                    const topDoc = (window.top || window.parent || window).document;
+                    const inputs = topDoc.querySelectorAll('input[type="text"]');
+                    inputs.forEach(input => {
+                        if (input.placeholder && (input.placeholder.includes('502') || input.placeholder.includes('Teléfono'))) {
+                            input.setAttribute('type', 'tel');
+                            input.setAttribute('inputmode', 'numeric');
+                            input.setAttribute('pattern', '[0-9]*');
+                        }
+                    });
+                } catch(e) {}
+            };
+            setTimeout(enableNumericKeypad, 100);
+            setTimeout(enableNumericKeypad, 400);
+            setInterval(enableNumericKeypad, 1000);
+        })();
+    </script>
+    """
+    components.html(js_numeric_keypad, height=0, width=0)
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -593,15 +715,24 @@ forecast_data = fetch_forecast_data(lat, lon) if lat and lon else {}
 @st.fragment(run_every=f"{ref_mins}m" if enable_autorefresh else None)
 def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime_last, last_dt):
     is_online = True
-    latest_date = last_dt if last_dt is not None else (data_df.index[-1] if not data_df.empty else None)
+    
+    # Resolver la zona horaria del objetivo (de la API de pronóstico o cookie del navegador)
+    station_tz = forecast.get("timezone", "") if forecast else ""
+    local_latest_date = convert_utc_to_local(last_dt, station_tz) if last_dt is not None else None
+    
+    latest_date = local_latest_date if local_latest_date is not None else (data_df.index[-1] if not data_df.empty else None)
 
     if latest_date is None:
         is_online = False
         st.warning("⚠️ No se encontraron registros de telemetría recientes para esta estación.")
     else:
-        # Si la última lectura tiene más de 3 horas, consideramos la estación fuera de línea
-        if (now - latest_date).total_seconds() > 10800:
-            is_online = False
+        # Evaluar offline si no hay lecturas recientes en las últimas 3 horas
+        try:
+            now_tz = pd.Timestamp.now(tz=latest_date.tzinfo) if getattr(latest_date, 'tzinfo', None) else datetime.now()
+            if (now_tz - latest_date).total_seconds() > 10800:
+                is_online = False
+        except Exception:
+            pass
 
     # --- BANNER SUPERIOR DE LA ESTACIÓN ---
     col_head1, col_head2 = st.columns([3, 1])
@@ -615,7 +746,8 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
     with col_head2:
         st.markdown("<br>", unsafe_allow_html=True)
         if is_online and latest_date is not None:
-            st.markdown(f'<div style="text-align: right;"><span class="status-badge">● SENSOR ONLINE ({latest_date.strftime("%H:%M")})</span></div>', unsafe_allow_html=True)
+            badge_time_str = latest_date.strftime("%I:%M %p").lower()
+            st.markdown(f'<div style="text-align: right;"><span class="status-badge">● SENSOR ONLINE ({badge_time_str})</span></div>', unsafe_allow_html=True)
         else:
             st.markdown('<div style="text-align: right;"><span class="status-badge-offline">● SENSOR OFFLINE (Usando Respaldo)</span></div>', unsafe_allow_html=True)
 
@@ -728,11 +860,31 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
         </div>
         """, unsafe_allow_html=True)
 
+    # Integración temporal de Precipitaciones (PCP mm/h × Fracción de tiempo en horas = mm de lluvia por intervalo)
+    if not data_df.empty and "Lluvia (mm/h)" in data_df:
+        if len(data_df) > 1:
+            dt_hours_rain = data_df.index.to_series().diff().dt.total_seconds() / 3600.0
+            med_dt_rain = dt_hours_rain.median()
+            if pd.isna(med_dt_rain) or med_dt_rain <= 0:
+                med_dt_rain = 0.25
+            dt_hours_rain = dt_hours_rain.fillna(med_dt_rain)
+        else:
+            dt_hours_rain = 0.25
+
+        # Incremento real de lluvia por intervalo en mm
+        rain_interval_series = (data_df["Lluvia (mm/h)"].fillna(0) * dt_hours_rain).round(2)
+        # Suma acumulada total del período en mm
+        rain_cum_series = rain_interval_series.cumsum().round(1)
+        total_rain_period = rain_cum_series.iloc[-1] if not rain_cum_series.empty else 0.0
+    else:
+        rain_interval_series = None
+        rain_cum_series = None
+        total_rain_period = 0.0
+
     # 6. Precipitación (PCP)
     if is_online:
         pcp_val = realtime_last.get("PCP", get_latest_valid_val(data_df, "Lluvia (mm/h)", 0))
-        pca_max = data_df["Lluvia Acumulada (mm)"].max() if "Lluvia Acumulada (mm)" in data_df else 0
-        sub_pcp = f"Acumulado: {pca_max:.1f} mm"
+        sub_pcp = f"Acumulado: {total_rain_period:.1f} mm"
     else:
         pcp_val = 0
         sub_pcp = "Respaldo Pronóstico"
@@ -753,8 +905,8 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
         "🔮 Pronóstico 7 Días",
         "🌡️ Temperatura y Humedad",
         "🚩 Dinámica del Viento",
-        "🌧️ Precipitaciones",
-        "☀️ Radiación Solar & UV",
+        "🌧️ Lluvia",
+        "☀️ Radiación Solar",
         "🛩️ Barómetro (Presión)"
     ])
 
@@ -773,6 +925,20 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
         daily_list = forecast.get("daily", {}).get("data", [])
 
         if daily_list:
+            # Evaluación del campo 'cnt' (Horas restantes del día actual):
+            # Si le quedan 10 horas o menos a hoy (cnt <= 10), descartar el día de hoy y pasar al día siguiente como primer día
+            cnt_val = forecast.get("cnt")
+            if cnt_val is None and len(daily_list) > 0:
+                cnt_val = daily_list[0].get("cnt")
+
+            if cnt_val is not None:
+                try:
+                    cnt_int = int(cnt_val)
+                    if cnt_int <= 10 and len(daily_list) > 1:
+                        daily_list = daily_list[1:]
+                except (ValueError, TypeError):
+                    pass
+
             st.markdown("<br>", unsafe_allow_html=True)
 
             # Tarjetas de Pronóstico Diario
@@ -786,19 +952,74 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 rain_intensity = day_data.get("rain_intensity", "sin lluvia")
                 wind_spd = day_data.get("windSpeed", 0)
                 wind_dir = day_data.get("windBearing_name", "")
-                uv_max = day_data.get("uvMax", "N/A")
                 etp_val = day_data.get("etp", "N/A")
+
+                # Formateo y redondeo limpio de valores
+                t_high_str = f"{round(float(t_high))}°" if not pd.isna(t_high) else "N/A"
+                t_low_str = f"{round(float(t_low))}°C" if not pd.isna(t_low) else "N/A"
+                
+                try:
+                    r_val = float(rain_mm)
+                    rain_str = f"{round(r_val)} mm" if r_val.is_integer() or round(r_val, 1) == round(r_val) else f"{r_val:.1f} mm"
+                except Exception:
+                    rain_str = f"{rain_mm} mm"
+
+                try:
+                    w_val = float(wind_spd)
+                    wind_spd_str = f"{round(w_val)}"
+                except Exception:
+                    wind_spd_str = f"{wind_spd}"
+
+                # Humedad Promedio y Cálculo de Delta respecto al día anterior
+                hum_raw = day_data.get("humidity", day_data.get("humidityAvg", day_data.get("rh_mean", None)))
+                h_pct = None
+                if hum_raw is not None:
+                    try:
+                        h_f = float(hum_raw)
+                        h_pct = round(h_f * 100) if h_f <= 1.0 else round(h_f)
+                    except Exception:
+                        pass
+
+                hum_delta_str = ""
+                if idx > 0 and h_pct is not None:
+                    prev_day_data = daily_list[idx - 1]
+                    prev_hum_raw = prev_day_data.get("humidity", prev_day_data.get("humidityAvg", prev_day_data.get("rh_mean", None)))
+                    if prev_hum_raw is not None:
+                        try:
+                            prev_f = float(prev_hum_raw)
+                            prev_pct = round(prev_f * 100) if prev_f <= 1.0 else round(prev_f)
+                            diff = h_pct - prev_pct
+                            if diff > 0:
+                                hum_delta_str = f' <span style="color:#00e676; font-size:0.8rem; font-weight:bold;">(▲ +{diff}%)</span>'
+                            elif diff < 0:
+                                hum_delta_str = f' <span style="color:#ff3366; font-size:0.8rem; font-weight:bold;">(▼ {diff}%)</span>'
+                            else:
+                                hum_delta_str = f' <span style="color:#8f9ba8; font-size:0.8rem;">(=)</span>'
+                        except Exception:
+                            pass
+
+                hum_line = f'<div class="forecast-detail">💦 Hum: <b>{h_pct}%</b>{hum_delta_str}</div>' if h_pct is not None else ""
+
+                # ETP line (ocultar por completo si es None, N/A, nan, o null)
+                if etp_val is None or str(etp_val).strip().lower() in ["none", "n/a", "nan", "null", ""]:
+                    etp_line = ""
+                else:
+                    try:
+                        e_val = float(etp_val)
+                        etp_line = f'<div class="forecast-detail">🌱 ETP: <b>{round(e_val, 1)} mm</b></div>'
+                    except Exception:
+                        etp_line = f'<div class="forecast-detail">🌱 ETP: <b>{etp_val} mm</b></div>'
 
                 with cols[idx]:
                     st.markdown(f"""
                     <div class="forecast-card">
                         <div class="forecast-day">{day_name} {day_date}</div>
-                        <div class="forecast-temp">{t_high:.1f}° <span style="font-size:0.8rem; color:#8f9ba8;">/ {t_low:.1f}°C</span></div>
-                        <div class="forecast-detail">🌧️ <b>{rain_mm} mm</b><br>({rain_intensity})</div>
-                        <hr style="border-color:#2e3440; margin: 8px 0;">
-                        <div class="forecast-detail">🚩 {wind_spd} Km/h {wind_dir}</div>
-                        <div class="forecast-detail">☀️ UV Max: <b>{uv_max}</b></div>
-                        <div class="forecast-detail">🌱 ETP: <b>{etp_val} mm</b></div>
+                        <div class="forecast-temp">{t_high_str} <span style="font-size:0.85rem;">/ {t_low_str}</span></div>
+                        <div class="forecast-detail">🌧️ <b>{rain_str}</b><br>({rain_intensity})</div>
+                        <hr style="border-color:var(--card-border); margin: 8px 0;">
+                        <div class="forecast-detail">🚩 {wind_spd_str} Km/h {wind_dir}</div>
+                        {hum_line}
+                        {etp_line}
                     </div>
                     """, unsafe_allow_html=True)
 
@@ -807,6 +1028,7 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
             # Gráficos del Pronóstico
             df_fcst = pd.DataFrame(daily_list)
             df_fcst["fecha_label"] = df_fcst["cy_dia"] + " " + df_fcst["cy_simpletime"]
+            df_fcst["rain_clean"] = pd.to_numeric(df_fcst.get("daily_rain_mm", 0), errors="coerce").fillna(0)
 
             fig_fcst = make_subplots(specs=[[{"secondary_y": True}]])
             fig_fcst.add_trace(
@@ -816,26 +1038,25 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
             )
             fig_fcst.add_trace(
                 gg.Scatter(x=df_fcst["fecha_label"], y=df_fcst["temperatureLow"], name="Temp. Mínima (°C)",
-                           line=dict(color="#00e5ff", width=3, dash="dash")),
+                           line=dict(color="#00e5ff", width=3)),
                 secondary_y=False
             )
             fig_fcst.add_trace(
-                gg.Bar(x=df_fcst["fecha_label"], y=df_fcst["daily_rain_mm"], name="Lluvia Proyectada (mm)",
+                gg.Bar(x=df_fcst["fecha_label"], y=df_fcst["rain_clean"], name="Lluvia Diaria (mm)",
                        marker_color="#29b6f6", opacity=0.6),
                 secondary_y=True
             )
 
             fig_fcst.update_layout(
                 title="Evolución de Temperaturas y Lluvias Proyectadas (7 Días)",
-                template="plotly_dark",
                 paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(20,24,33,0.8)",
+                plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
                 margin=dict(l=20, r=20, t=50, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
-            fig_fcst.update_yaxes(title_text="Temperatura (°C)", secondary_y=False, gridcolor="#2a3142")
-            fig_fcst.update_yaxes(title_text="Lluvia (mm)", secondary_y=True, showgrid=False)
+            fig_fcst.update_yaxes(title_text="Temperatura (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+            fig_fcst.update_yaxes(title_text="Lluvia Diaria (mm)", secondary_y=True, showgrid=False)
             st.plotly_chart(fig_fcst, use_container_width=True)
 
         else:
@@ -859,14 +1080,13 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 )
             fig_temp.update_layout(
                 title="Evolución de Temperatura y Humedad Relativa",
-                template="plotly_dark",
                 paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(20,24,33,0.8)",
+                plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
                 margin=dict(l=20, r=20, t=50, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
-            fig_temp.update_yaxes(title_text="Temperatura (°C)", secondary_y=False, gridcolor="#2a3142")
+            fig_temp.update_yaxes(title_text="Temperatura (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
             fig_temp.update_yaxes(title_text="Humedad (%)", secondary_y=True, showgrid=False)
             st.plotly_chart(fig_temp, use_container_width=True)
         else:
@@ -890,14 +1110,13 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                     ))
                 fig_wind.update_layout(
                     title="Velocidad y Ráfagas de Viento",
-                    template="plotly_dark",
                     paper_bgcolor="rgba(0,0,0,0)",
-                    plot_bgcolor="rgba(20,24,33,0.8)",
+                    plot_bgcolor="rgba(0,0,0,0)",
                     hovermode="x unified",
                     margin=dict(l=20, r=20, t=50, b=20),
                     legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
                 )
-                fig_wind.update_yaxes(title_text="Velocidad (Km/h)", gridcolor="#2a3142")
+                fig_wind.update_yaxes(title_text="Velocidad (Km/h)", gridcolor="rgba(128,128,128,0.2)")
                 st.plotly_chart(fig_wind, use_container_width=True)
 
             with col_w2:
@@ -910,8 +1129,7 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                             theta="Dirección Viento (°)",
                             color="Velocidad Viento (Km/h)",
                             color_continuous_scale="Viridis",
-                            title="Rosa de Vientos (Dirección e Intensidad)",
-                            template="plotly_dark"
+                            title="Rosa de Vientos (Dirección e Intensidad)"
                         )
                         fig_polar.update_layout(
                             paper_bgcolor="rgba(0,0,0,0)",
@@ -925,29 +1143,32 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
     with tab4:
         if not data_df.empty:
             fig_rain = make_subplots(specs=[[{"secondary_y": True}]])
-            if "Lluvia (mm/h)" in data_df:
+            
+            if rain_interval_series is not None:
+                # 1. Incrementos Reales de Lluvia por intervalo (mm) en Barras Verticales
                 fig_rain.add_trace(
-                    gg.Bar(x=data_df.index, y=data_df["Lluvia (mm/h)"], name="Lluvia Instantánea (mm/h)",
+                    gg.Bar(x=data_df.index, y=rain_interval_series, name="Incremento Lluvia (mm)",
                            marker_color=COLOR_RAIN, opacity=0.8),
                     secondary_y=False
                 )
-            if "Lluvia Acumulada (mm)" in data_df:
+                
+                # 2. Lluvia Acumulada Real (mm) en Línea Continua
                 fig_rain.add_trace(
-                    gg.Scatter(x=data_df.index, y=data_df["Lluvia Acumulada (mm)"], name="Acumulado (mm)",
-                               line=dict(color="#00e5ff", width=3)),
+                    gg.Scatter(x=data_df.index, y=rain_cum_series, name="Lluvia Acumulada (mm)",
+                               line=dict(color="#00e676", width=3)),
                     secondary_y=True
                 )
+
             fig_rain.update_layout(
-                title="Precipitación Instantánea y Acumulada",
-                template="plotly_dark",
+                title="Incrementos de Lluvia (Barras) y Precipitación Acumulada (Línea)",
                 paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(20,24,33,0.8)",
+                plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
                 margin=dict(l=20, r=20, t=50, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
-            fig_rain.update_yaxes(title_text="Lluvia (mm/h)", secondary_y=False, gridcolor="#2a3142")
-            fig_rain.update_yaxes(title_text="Acumulado (mm)", secondary_y=True, showgrid=False)
+            fig_rain.update_yaxes(title_text="Incremento de Lluvia (mm)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+            fig_rain.update_yaxes(title_text="Lluvia Acumulada (mm)", secondary_y=True, showgrid=False)
             st.plotly_chart(fig_rain, use_container_width=True)
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
@@ -962,24 +1183,38 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                                line=dict(color=COLOR_SOLAR, width=2), fill="tozeroy", fillcolor="rgba(255,234,0,0.15)"),
                     secondary_y=False
                 )
-            if "Índice UV" in data_df:
+
+                # Integración temporal de Radiación Solar (Irradiación W/m² × Fracción de tiempo en horas = Energía Wh/m²)
+                sol_series = data_df["Radiación Solar (W/m²)"].fillna(0)
+                if len(data_df) > 1:
+                    dt_hours = data_df.index.to_series().diff().dt.total_seconds() / 3600.0
+                    median_dt = dt_hours.median()
+                    if pd.isna(median_dt) or median_dt <= 0:
+                        median_dt = 0.25  # Fallback a 15 minutos (0.25 h)
+                    dt_hours = dt_hours.fillna(median_dt)
+                else:
+                    dt_hours = 0.25
+
+                # Energía acumulada total del período en kWh/m²
+                rad_cum_kwh = ((sol_series * dt_hours).cumsum() / 1000.0).round(2)
                 fig_rad.add_trace(
-                    gg.Scatter(x=data_df.index, y=data_df["Índice UV"], name="Índice UV",
-                               line=dict(color="#ff9100", width=2.5, dash="dot")),
+                    gg.Scatter(x=data_df.index, y=rad_cum_kwh, name="Radiación Acumulada (kWh/m²)",
+                               line=dict(color="#00e676", width=2.5, dash="dash")),
                     secondary_y=True
                 )
+
             fig_rad.update_layout(
-                title="Radiación Solar Global e Índice UV",
-                template="plotly_dark",
+                title="Radiación Solar Global y Energía Acumulada (kWh/m²)",
                 paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(20,24,33,0.8)",
+                plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
                 margin=dict(l=20, r=20, t=50, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
             )
-            fig_rad.update_yaxes(title_text="Radiación (W/m²)", secondary_y=False, gridcolor="#2a3142")
-            fig_rad.update_yaxes(title_text="Índice UV", secondary_y=True, showgrid=False)
+            fig_rad.update_yaxes(title_text="Radiación Instantánea (W/m²)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+            fig_rad.update_yaxes(title_text="Energía Acumulada (kWh/m²)", secondary_y=True, showgrid=False)
             st.plotly_chart(fig_rad, use_container_width=True)
+            st.caption("💡 **Asociación con Paneles Solares:** Multiplica los **kWh/m²** del gráfico por los **kWp** de tu planta × **0.82**. *(Ej: 5 kWh/m² × 5 kWp × 0.82 ≈ **20.5 kWh** generados)*.")
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
 
@@ -996,13 +1231,12 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
             prs_max_val = data_df["Presión (hPa)"].max() + 2
             fig_prs.update_layout(
                 title="Tendencia de Presión Atmosférica (Barómetro)",
-                template="plotly_dark",
                 paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(20,24,33,0.8)",
+                plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
                 margin=dict(l=20, r=20, t=50, b=20)
             )
-            fig_prs.update_yaxes(title_text="Presión (hPa)", range=[prs_min_val, prs_max_val], gridcolor="#2a3142")
+            fig_prs.update_yaxes(title_text="Presión (hPa)", range=[prs_min_val, prs_max_val], gridcolor="rgba(128,128,128,0.2)")
             st.plotly_chart(fig_prs, use_container_width=True)
         else:
             st.info("Esta estación no cuenta con sensor de Presión Barométrica registrado.")
