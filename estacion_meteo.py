@@ -44,10 +44,45 @@ components.html("""
 # Estilos CSS adaptables que soportan TANTO Tema Oscuro (Dark) como Tema Claro (Light)
 st.markdown("""
 <style>
-    /* 1. Eliminación del espacio superior muerto (Header Padding) */
+    /* 1. Eliminación del espacio superior muerto y botón de menú flotante */
     header[data-testid="stHeader"] {
         background-color: transparent !important;
-        height: 2rem !important;
+        height: 2.5rem !important;
+    }
+
+    /* Botón Flotante para Abrir/Cerrar Menú Lateral (Sidebar Toggle) */
+    [data-testid="stSidebarCollapseButton"] button,
+    [data-testid="collapsedControl"] button,
+    [data-testid="collapsedControl"] div,
+    button[aria-label="Expand sidebar"],
+    button[aria-label="Collapse sidebar"],
+    [data-testid="stHeader"] button {
+        background: linear-gradient(135deg, #1e222d 0%, #14171f 100%) !important;
+        color: #00e5ff !important;
+        border: 1.5px solid #00e5ff !important;
+        border-radius: 10px !important;
+        box-shadow: 0 4px 14px rgba(0, 229, 255, 0.35) !important;
+        padding: 6px 10px !important;
+        z-index: 999999 !important;
+        transition: all 0.2s ease-in-out !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] button:hover,
+    [data-testid="collapsedControl"] button:hover,
+    button[aria-label="Expand sidebar"]:hover,
+    button[aria-label="Collapse sidebar"]:hover {
+        background: #00e5ff !important;
+        color: #14171f !important;
+        box-shadow: 0 6px 18px rgba(0, 229, 255, 0.6) !important;
+        transform: scale(1.08) !important;
+    }
+
+    [data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="collapsedControl"] svg,
+    button[aria-label="Expand sidebar"] svg,
+    button[aria-label="Collapse sidebar"] svg {
+        fill: #00e5ff !important;
+        color: #00e5ff !important;
     }
     .block-container {
         padding-top: 1rem !important;
@@ -103,15 +138,23 @@ st.markdown("""
         color: #57606a !important;
     }
     
-    /* 3. Tarjetas de Métricas KPI */
+    /* 3. Grilla de Tarjetas de Métricas KPI */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 12px;
+        margin-bottom: 16px;
+        width: 100%;
+        box-sizing: border-box;
+    }
     .metric-card {
         background: var(--card-bg);
         border: 1px solid var(--card-border);
         border-radius: 12px;
-        padding: 16px 20px;
+        padding: 14px 16px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-        margin-bottom: 12px;
         transition: transform 0.2s ease, border-color 0.2s ease;
+        box-sizing: border-box;
     }
     .metric-card:hover {
         transform: translateY(-2px);
@@ -127,7 +170,7 @@ st.markdown("""
     }
     .metric-value {
         color: var(--card-val-color);
-        font-size: 1.8rem;
+        font-size: 1.7rem;
         font-weight: 700;
         line-height: 1.2;
     }
@@ -137,6 +180,7 @@ st.markdown("""
         font-weight: 500;
         margin-top: 4px;
     }
+
     .status-badge {
         display: inline-block;
         padding: 4px 12px;
@@ -166,6 +210,7 @@ st.markdown("""
         padding: 14px 10px;
         text-align: center;
         margin-bottom: 10px;
+        transition: transform 0.2s ease, border-color 0.2s ease;
     }
     .forecast-card:hover {
         border-color: #ffab00;
@@ -196,16 +241,47 @@ st.markdown("""
     }
 
     /* 5. Reglas Responsive para Dispositivos Móviles */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-left: 0.75rem !important;
-            padding-right: 0.75rem !important;
+    @media (max-width: 1024px) {
+        .kpi-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 10px !important;
+        }
+    }
+    @media (max-width: 650px) {
+        .block-container, [data-testid="stMainBlockContainer"] {
+            padding-left: 0.3rem !important;
+            padding-right: 0.3rem !important;
+            padding-top: 0.5rem !important;
+            max-width: 100% !important;
+        }
+        .kpi-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            gap: 8px !important;
+            margin-bottom: 12px !important;
         }
         .metric-card {
-            padding: 12px 14px !important;
+            padding: 10px 10px !important;
+        }
+        .metric-title {
+            font-size: 0.74rem !important;
+            letter-spacing: 0.3px !important;
         }
         .metric-value {
-            font-size: 1.5rem !important;
+            font-size: 1.35rem !important;
+        }
+        .metric-subtitle {
+            font-size: 0.72rem !important;
+        }
+
+        [data-testid="stTabs"], [data-testid="stPlotlyChart"], div.js-plotly-plot, .plotly, .svg-container {
+            width: 100% !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
+        }
+        button[data-baseweb="tab"] {
+            padding-left: 6px !important;
+            padding-right: 6px !important;
+            font-size: 0.82rem !important;
         }
         .forecast-card {
             padding: 16px 12px !important;
@@ -217,11 +293,15 @@ st.markdown("""
         .forecast-temp {
             font-size: 1.45rem !important;
         }
-        .forecast-detail {
-            font-size: 0.92rem !important;
+        div[data-testid="stTabs"] div[data-testid="stHorizontalBlock"] {
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
         }
-        [data-testid="column"] {
+        div[data-testid="stTabs"] [data-testid="column"] {
+            width: 135px !important;
             min-width: 135px !important;
+            max-width: 160px !important;
+            flex: 0 0 135px !important;
         }
     }
 </style>
@@ -753,10 +833,8 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
 
     st.divider()
 
-    # --- METRICAS KPIS PRINCIPALES (PRIORIZA /LAST -> HISTÓRICO -> BACKUP PRONÓSTICO) ---
+    # --- METRICAS KPIS PRINCIPALES (GRILLA NATIVA .kpi-grid) ---
     currently = forecast.get("currently", {}) if not is_online else {}
-
-    kpi1, kpi2, kpi3, kpi4, kpi5, kpi6 = st.columns(6)
 
     # 1. Temperatura (TMP)
     if is_online:
@@ -770,15 +848,6 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
 
     temp_display_str = f"{float(temp_val):.1f} °C" if not pd.isna(temp_val) and temp_val is not None else "N/A"
 
-    with kpi1:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">🌡️ Temperatura</div>
-            <div class="metric-value">{temp_display_str}</div>
-            <div class="metric-subtitle">{sub_temp}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
     # 2. Humedad (HRP)
     if is_online:
         hr_val = realtime_last.get("HRP", get_latest_valid_val(data_df, "Humedad (%)", np.nan))
@@ -790,15 +859,6 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
 
     hr_display_str = f"{float(hr_val):.0f} %" if not pd.isna(hr_val) and hr_val is not None else "N/A"
 
-    with kpi2:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">💦 Humedad</div>
-            <div class="metric-value">{hr_display_str}</div>
-            <div class="metric-subtitle">{sub_hr}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
     # 3. Presión (PRS)
     if is_online:
         prs_val = realtime_last.get("PRS", get_latest_valid_val(data_df, "Presión (hPa)", np.nan))
@@ -809,16 +869,7 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
         prs_val = currently.get("pressure", currently.get("air_pressure_at_sea_level", np.nan))
         sub_prs = "Respaldo Pronóstico"
 
-    prs_display_str = f"{float(prs_val):.1f} <span style='font-size: 1rem;'>hPa</span>" if not pd.isna(prs_val) and prs_val is not None else "N/A"
-
-    with kpi3:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">🛩️ Presión</div>
-            <div class="metric-value">{prs_display_str}</div>
-            <div class="metric-subtitle">{sub_prs}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    prs_display_str = f"{float(prs_val):.1f} <span style='font-size: 0.9rem;'>hPa</span>" if not pd.isna(prs_val) and prs_val is not None else "N/A"
 
     # 4. Viento (WNS / WND)
     if is_online:
@@ -832,14 +883,24 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
         cardinal = currently.get("cy_bearing", "N/A")
         sub_wind = "Respaldo Pronóstico"
 
-    with kpi4:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">🚩 Viento</div>
-            <div class="metric-value">{float(wns_val):.0f} <span style="font-size: 1rem;">Km/h</span> ({cardinal})</div>
-            <div class="metric-subtitle">{sub_wind}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    # Integración temporal de Precipitaciones
+    if not data_df.empty and "Lluvia (mm/h)" in data_df:
+        if len(data_df) > 1:
+            dt_hours_rain = data_df.index.to_series().diff().dt.total_seconds() / 3600.0
+            med_dt_rain = dt_hours_rain.median()
+            if pd.isna(med_dt_rain) or med_dt_rain <= 0:
+                med_dt_rain = 0.25
+            dt_hours_rain = dt_hours_rain.fillna(med_dt_rain)
+        else:
+            dt_hours_rain = 0.25
+
+        rain_interval_series = (data_df["Lluvia (mm/h)"].fillna(0) * dt_hours_rain).round(2)
+        rain_cum_series = rain_interval_series.cumsum().round(1)
+        total_rain_period = rain_cum_series.iloc[-1] if not rain_cum_series.empty else 0.0
+    else:
+        rain_interval_series = None
+        rain_cum_series = None
+        total_rain_period = 0.0
 
     # 5. Radiación & UV (RSOL / UV)
     if is_online:
@@ -851,36 +912,6 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
         uv_val = currently.get("uvIndex", 0)
         sub_uv = f"Índice UV: <b>{float(uv_val):.1f}</b> (Pronóstico)"
 
-    with kpi5:
-        st.markdown(f"""
-        <div class="metric-card">
-            <div class="metric-title">☀️ Rad. Solar / UV</div>
-            <div class="metric-value">{float(rsol_val):.0f} <span style="font-size: 1rem;">W/m²</span></div>
-            <div class="metric-subtitle">{sub_uv}</div>
-        </div>
-        """, unsafe_allow_html=True)
-
-    # Integración temporal de Precipitaciones (PCP mm/h × Fracción de tiempo en horas = mm de lluvia por intervalo)
-    if not data_df.empty and "Lluvia (mm/h)" in data_df:
-        if len(data_df) > 1:
-            dt_hours_rain = data_df.index.to_series().diff().dt.total_seconds() / 3600.0
-            med_dt_rain = dt_hours_rain.median()
-            if pd.isna(med_dt_rain) or med_dt_rain <= 0:
-                med_dt_rain = 0.25
-            dt_hours_rain = dt_hours_rain.fillna(med_dt_rain)
-        else:
-            dt_hours_rain = 0.25
-
-        # Incremento real de lluvia por intervalo en mm
-        rain_interval_series = (data_df["Lluvia (mm/h)"].fillna(0) * dt_hours_rain).round(2)
-        # Suma acumulada total del período en mm
-        rain_cum_series = rain_interval_series.cumsum().round(1)
-        total_rain_period = rain_cum_series.iloc[-1] if not rain_cum_series.empty else 0.0
-    else:
-        rain_interval_series = None
-        rain_cum_series = None
-        total_rain_period = 0.0
-
     # 6. Precipitación (PCP)
     if is_online:
         pcp_val = realtime_last.get("PCP", get_latest_valid_val(data_df, "Lluvia (mm/h)", 0))
@@ -889,14 +920,40 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
         pcp_val = 0
         sub_pcp = "Respaldo Pronóstico"
 
-    with kpi6:
-        st.markdown(f"""
+    st.markdown(f"""
+    <div class="kpi-grid">
+        <div class="metric-card">
+            <div class="metric-title">🌡️ Temperatura</div>
+            <div class="metric-value">{temp_display_str}</div>
+            <div class="metric-subtitle">{sub_temp}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">💦 Humedad</div>
+            <div class="metric-value">{hr_display_str}</div>
+            <div class="metric-subtitle">{sub_hr}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">🛩️ Presión</div>
+            <div class="metric-value">{prs_display_str}</div>
+            <div class="metric-subtitle">{sub_prs}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">🚩 Viento</div>
+            <div class="metric-value">{float(wns_val):.0f} <span style="font-size: 0.9rem;">Km/h</span> ({cardinal})</div>
+            <div class="metric-subtitle">{sub_wind}</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-title">☀️ Rad. Solar / UV</div>
+            <div class="metric-value">{float(rsol_val):.0f} <span style="font-size: 0.9rem;">W/m²</span></div>
+            <div class="metric-subtitle">{sub_uv}</div>
+        </div>
         <div class="metric-card">
             <div class="metric-title">🌧️ Precipitación</div>
-            <div class="metric-value">{float(pcp_val):.1f} <span style="font-size: 1rem;">mm/h</span></div>
+            <div class="metric-value">{float(pcp_val):.1f} <span style="font-size: 0.9rem;">mm/h</span></div>
             <div class="metric-subtitle">{sub_pcp}</div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
 
@@ -1047,17 +1104,19 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 secondary_y=True
             )
 
+            PLOTLY_CFG = {'displayModeBar': 'hover', 'responsive': True}
+
             fig_fcst.update_layout(
-                title="Evolución de Temperaturas y Lluvias Proyectadas (7 Días)",
+                title=dict(text="Evolución de Temperaturas y Lluvias (7 Días)", font=dict(size=14), x=0.0, xanchor="left"),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
-                margin=dict(l=20, r=20, t=50, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                margin=dict(l=4, r=4, t=48, b=20),
+                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_fcst.update_yaxes(title_text="Temperatura (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
-            fig_fcst.update_yaxes(title_text="Lluvia Diaria (mm)", secondary_y=True, showgrid=False)
-            st.plotly_chart(fig_fcst, use_container_width=True)
+            fig_fcst.update_yaxes(title_text="Temp (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+            fig_fcst.update_yaxes(title_text="Lluvia (mm)", secondary_y=True, showgrid=False)
+            st.plotly_chart(fig_fcst, use_container_width=True, config=PLOTLY_CFG)
 
         else:
             st.warning("⚠️ No hay información de pronóstico disponible para esta ubicación.")
@@ -1079,16 +1138,16 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                     secondary_y=True
                 )
             fig_temp.update_layout(
-                title="Evolución de Temperatura y Humedad Relativa",
+                title=dict(text="Evolución de Temperatura y Humedad Relativa", font=dict(size=14), x=0.0, xanchor="left"),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
-                margin=dict(l=20, r=20, t=50, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                margin=dict(l=4, r=4, t=48, b=20),
+                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_temp.update_yaxes(title_text="Temperatura (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+            fig_temp.update_yaxes(title_text="Temp (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
             fig_temp.update_yaxes(title_text="Humedad (%)", secondary_y=True, showgrid=False)
-            st.plotly_chart(fig_temp, use_container_width=True)
+            st.plotly_chart(fig_temp, use_container_width=True, config=PLOTLY_CFG)
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
 
@@ -1109,15 +1168,15 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                         line=dict(color=COLOR_GUST, width=2, dash="dash")
                     ))
                 fig_wind.update_layout(
-                    title="Velocidad y Ráfagas de Viento",
+                    title=dict(text="Velocidad y Ráfagas de Viento", font=dict(size=14), x=0.0, xanchor="left"),
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
                     hovermode="x unified",
-                    margin=dict(l=20, r=20, t=50, b=20),
-                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                    margin=dict(l=4, r=4, t=48, b=20),
+                    legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
                 )
                 fig_wind.update_yaxes(title_text="Velocidad (Km/h)", gridcolor="rgba(128,128,128,0.2)")
-                st.plotly_chart(fig_wind, use_container_width=True)
+                st.plotly_chart(fig_wind, use_container_width=True, config=PLOTLY_CFG)
 
             with col_w2:
                 if "Dirección Viento (°)" in data_df and "Velocidad Viento (Km/h)" in data_df:
@@ -1133,9 +1192,9 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                         )
                         fig_polar.update_layout(
                             paper_bgcolor="rgba(0,0,0,0)",
-                            margin=dict(l=20, r=20, t=50, b=20)
+                            margin=dict(l=4, r=4, t=48, b=20)
                         )
-                        st.plotly_chart(fig_polar, use_container_width=True)
+                        st.plotly_chart(fig_polar, use_container_width=True, config=PLOTLY_CFG)
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
 
@@ -1160,16 +1219,16 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 )
 
             fig_rain.update_layout(
-                title="Incrementos de Lluvia (Barras) y Precipitación Acumulada (Línea)",
+                title=dict(text="Incrementos (Barras) y Precipitación Acumulada (Línea)", font=dict(size=14), x=0.0, xanchor="left"),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
-                margin=dict(l=20, r=20, t=50, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                margin=dict(l=4, r=4, t=48, b=20),
+                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_rain.update_yaxes(title_text="Incremento de Lluvia (mm)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
-            fig_rain.update_yaxes(title_text="Lluvia Acumulada (mm)", secondary_y=True, showgrid=False)
-            st.plotly_chart(fig_rain, use_container_width=True)
+            fig_rain.update_yaxes(title_text="Incremento (mm)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+            fig_rain.update_yaxes(title_text="Acumulado (mm)", secondary_y=True, showgrid=False)
+            st.plotly_chart(fig_rain, use_container_width=True, config=PLOTLY_CFG)
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
 
@@ -1204,16 +1263,16 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 )
 
             fig_rad.update_layout(
-                title="Radiación Solar Global y Energía Acumulada (kWh/m²)",
+                title=dict(text="Radiación Solar Global y Energía Acumulada (kWh/m²)", font=dict(size=14), x=0.0, xanchor="left"),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
-                margin=dict(l=20, r=20, t=50, b=20),
-                legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1)
+                margin=dict(l=4, r=4, t=48, b=20),
+                legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_rad.update_yaxes(title_text="Radiación Instantánea (W/m²)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
-            fig_rad.update_yaxes(title_text="Energía Acumulada (kWh/m²)", secondary_y=True, showgrid=False)
-            st.plotly_chart(fig_rad, use_container_width=True)
+            fig_rad.update_yaxes(title_text="Radiación (W/m²)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
+            fig_rad.update_yaxes(title_text="Energía (kWh/m²)", secondary_y=True, showgrid=False)
+            st.plotly_chart(fig_rad, use_container_width=True, config=PLOTLY_CFG)
             st.caption("💡 **Asociación con Paneles Solares:** Multiplica los **kWh/m²** del gráfico por los **kWp** de tu planta × **0.82**. *(Ej: 5 kWh/m² × 5 kWp × 0.82 ≈ **20.5 kWh** generados)*.")
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
@@ -1230,14 +1289,14 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
             prs_min_val = data_df["Presión (hPa)"].min() - 2
             prs_max_val = data_df["Presión (hPa)"].max() + 2
             fig_prs.update_layout(
-                title="Tendencia de Presión Atmosférica (Barómetro)",
+                title=dict(text="Tendencia de Presión Atmosférica (Barómetro)", font=dict(size=14), x=0.0, xanchor="left"),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
-                margin=dict(l=20, r=20, t=50, b=20)
+                margin=dict(l=4, r=4, t=48, b=20)
             )
             fig_prs.update_yaxes(title_text="Presión (hPa)", range=[prs_min_val, prs_max_val], gridcolor="rgba(128,128,128,0.2)")
-            st.plotly_chart(fig_prs, use_container_width=True)
+            st.plotly_chart(fig_prs, use_container_width=True, config=PLOTLY_CFG)
         else:
             st.info("Esta estación no cuenta con sensor de Presión Barométrica registrado.")
 
