@@ -1104,18 +1104,20 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 secondary_y=True
             )
 
-            PLOTLY_CFG = {'displayModeBar': 'hover', 'responsive': True}
+            PLOTLY_CFG = {'displayModeBar': 'hover', 'responsive': True, 'scrollZoom': False}
 
             fig_fcst.update_layout(
                 title=dict(text="Evolución de Temperaturas y Lluvias (7 Días)", font=dict(size=14), x=0.0, xanchor="left"),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
+                dragmode=False,
                 margin=dict(l=4, r=4, t=48, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_fcst.update_yaxes(title_text="Temp (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
-            fig_fcst.update_yaxes(title_text="Lluvia (mm)", secondary_y=True, showgrid=False)
+            fig_fcst.update_xaxes(fixedrange=True)
+            fig_fcst.update_yaxes(title_text="Temp (°C)", secondary_y=False, fixedrange=True, gridcolor="rgba(128,128,128,0.2)")
+            fig_fcst.update_yaxes(title_text="Lluvia (mm)", secondary_y=True, fixedrange=True, showgrid=False)
             st.plotly_chart(fig_fcst, use_container_width=True, config=PLOTLY_CFG)
 
         else:
@@ -1142,11 +1144,13 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
+                dragmode=False,
                 margin=dict(l=4, r=4, t=48, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_temp.update_yaxes(title_text="Temp (°C)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
-            fig_temp.update_yaxes(title_text="Humedad (%)", secondary_y=True, showgrid=False)
+            fig_temp.update_xaxes(fixedrange=True)
+            fig_temp.update_yaxes(title_text="Temp (°C)", secondary_y=False, fixedrange=True, gridcolor="rgba(128,128,128,0.2)")
+            fig_temp.update_yaxes(title_text="Humedad (%)", secondary_y=True, fixedrange=True, showgrid=False)
             st.plotly_chart(fig_temp, use_container_width=True, config=PLOTLY_CFG)
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
@@ -1172,10 +1176,12 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                     paper_bgcolor="rgba(0,0,0,0)",
                     plot_bgcolor="rgba(0,0,0,0)",
                     hovermode="x unified",
+                    dragmode=False,
                     margin=dict(l=4, r=4, t=48, b=20),
                     legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
                 )
-                fig_wind.update_yaxes(title_text="Velocidad (Km/h)", gridcolor="rgba(128,128,128,0.2)")
+                fig_wind.update_xaxes(fixedrange=True)
+                fig_wind.update_yaxes(title_text="Velocidad (Km/h)", fixedrange=True, gridcolor="rgba(128,128,128,0.2)")
                 st.plotly_chart(fig_wind, use_container_width=True, config=PLOTLY_CFG)
 
             with col_w2:
@@ -1192,6 +1198,7 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                         )
                         fig_polar.update_layout(
                             paper_bgcolor="rgba(0,0,0,0)",
+                            dragmode=False,
                             margin=dict(l=4, r=4, t=48, b=20)
                         )
                         st.plotly_chart(fig_polar, use_container_width=True, config=PLOTLY_CFG)
@@ -1223,11 +1230,13 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
+                dragmode=False,
                 margin=dict(l=4, r=4, t=48, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_rain.update_yaxes(title_text="Incremento (mm)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
-            fig_rain.update_yaxes(title_text="Acumulado (mm)", secondary_y=True, showgrid=False)
+            fig_rain.update_xaxes(fixedrange=True)
+            fig_rain.update_yaxes(title_text="Incremento (mm)", secondary_y=False, fixedrange=True, gridcolor="rgba(128,128,128,0.2)")
+            fig_rain.update_yaxes(title_text="Acumulado (mm)", secondary_y=True, fixedrange=True, showgrid=False)
             st.plotly_chart(fig_rain, use_container_width=True, config=PLOTLY_CFG)
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
@@ -1243,18 +1252,17 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                     secondary_y=False
                 )
 
-                # Integración temporal de Radiación Solar (Irradiación W/m² × Fracción de tiempo en horas = Energía Wh/m²)
+                # Integración temporal de Radiación Solar
                 sol_series = data_df["Radiación Solar (W/m²)"].fillna(0)
                 if len(data_df) > 1:
                     dt_hours = data_df.index.to_series().diff().dt.total_seconds() / 3600.0
                     median_dt = dt_hours.median()
                     if pd.isna(median_dt) or median_dt <= 0:
-                        median_dt = 0.25  # Fallback a 15 minutos (0.25 h)
+                        median_dt = 0.25
                     dt_hours = dt_hours.fillna(median_dt)
                 else:
                     dt_hours = 0.25
 
-                # Energía acumulada total del período en kWh/m²
                 rad_cum_kwh = ((sol_series * dt_hours).cumsum() / 1000.0).round(2)
                 fig_rad.add_trace(
                     gg.Scatter(x=data_df.index, y=rad_cum_kwh, name="Radiación Acumulada (kWh/m²)",
@@ -1267,17 +1275,19 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
+                dragmode=False,
                 margin=dict(l=4, r=4, t=48, b=20),
                 legend=dict(orientation="h", yanchor="bottom", y=1.01, xanchor="left", x=0, font=dict(size=11))
             )
-            fig_rad.update_yaxes(title_text="Radiación (W/m²)", secondary_y=False, gridcolor="rgba(128,128,128,0.2)")
-            fig_rad.update_yaxes(title_text="Energía (kWh/m²)", secondary_y=True, showgrid=False)
+            fig_rad.update_xaxes(fixedrange=True)
+            fig_rad.update_yaxes(title_text="Radiación (W/m²)", secondary_y=False, fixedrange=True, gridcolor="rgba(128,128,128,0.2)")
+            fig_rad.update_yaxes(title_text="Energía (kWh/m²)", secondary_y=True, fixedrange=True, showgrid=False)
             st.plotly_chart(fig_rad, use_container_width=True, config=PLOTLY_CFG)
             st.caption("💡 **Asociación con Paneles Solares:** Multiplica los **kWh/m²** del gráfico por los **kWp** de tu planta × **0.82**. *(Ej: 5 kWh/m² × 5 kWp × 0.82 ≈ **20.5 kWh** generados)*.")
         else:
             st.info("Sin datos históricos de telemetría para mostrar en este gráfico.")
 
-    # TAB 6: PRESIÓN BAROMÉTRICA (ÚLTIMA PESTAÑA)
+    # TAB 6: PRESIÓN BAROMÉTRICA
     with tab6:
         if not data_df.empty and "Presión (hPa)" in data_df:
             fig_prs = gg.Figure()
@@ -1293,9 +1303,11 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
+                dragmode=False,
                 margin=dict(l=4, r=4, t=48, b=20)
             )
-            fig_prs.update_yaxes(title_text="Presión (hPa)", range=[prs_min_val, prs_max_val], gridcolor="rgba(128,128,128,0.2)")
+            fig_prs.update_xaxes(fixedrange=True)
+            fig_prs.update_yaxes(title_text="Presión (hPa)", range=[prs_min_val, prs_max_val], fixedrange=True, gridcolor="rgba(128,128,128,0.2)")
             st.plotly_chart(fig_prs, use_container_width=True, config=PLOTLY_CFG)
         else:
             st.info("Esta estación no cuenta con sensor de Presión Barométrica registrado.")
