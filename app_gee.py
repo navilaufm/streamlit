@@ -92,6 +92,49 @@ def add_ee_layer(folium_map, ee_image_object, vis_params, name, opacity=1.0):
         opacity=opacity
     ).add_to(folium_map)
 
+def setup_map_layers(folium_map, show_labels_default=True):
+    """
+    Configura las capas base de mapa (Google Satélite Híbrido, Esri Satélite, OpenStreetMap)
+    y una capa independiente de etiquetas/nombres de ciudades, fronteras y carreteras.
+    """
+    base_type = st.session_state.get("map_base_type", "Google Satélite (Híbrido + Etiquetas)")
+
+    # 1. Google Satélite Híbrido (Imágenes HD + Etiquetas integradas)
+    folium.TileLayer(
+        tiles='https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}',
+        attr='Google Maps',
+        name='🛰️ Google Satélite (Híbrido + Etiquetas)',
+        overlay=False,
+        show=(base_type == "Google Satélite (Híbrido + Etiquetas)")
+    ).add_to(folium_map)
+
+    # 2. Esri World Imagery (Imágenes de Satélite Puras)
+    folium.TileLayer(
+        tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attr='Esri World Imagery',
+        name='🛰️ Esri Satélite (Puro)',
+        overlay=False,
+        show=(base_type == "Esri Satélite (Puro)")
+    ).add_to(folium_map)
+
+    # 3. OpenStreetMap (Mapa Político / Calles)
+    folium.TileLayer(
+        tiles='OpenStreetMap',
+        name='🗺️ OpenStreetMap (Político)',
+        overlay=False,
+        show=(base_type == "OpenStreetMap (Político)")
+    ).add_to(folium_map)
+
+    # 4. Capa Overlay Independiente de Etiquetas y Nombres de Lugares (Esri Boundaries & Places)
+    folium.TileLayer(
+        tiles='https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+        attr='Esri Boundaries & Places',
+        name='🏷️ Nombres de Lugares & Fronteras',
+        overlay=True,
+        control=True,
+        show=show_labels_default
+    ).add_to(folium_map)
+
 # -----------------------------------------------------------------------------
 # PASO 3. BARRA LATERAL (SIDEBAR): PARÁMETROS DE ANÁLISIS
 # -----------------------------------------------------------------------------
@@ -156,6 +199,25 @@ if sel_frec_side != st.session_state["frecuencia"]:
     st.rerun()
 
 frecuencia = st.session_state["frecuencia"]
+
+st.sidebar.subheader("🗺️ Estilo de Mapa Base")
+options_base = [
+    "Google Satélite (Híbrido + Etiquetas)",
+    "Esri Satélite (Puro)",
+    "OpenStreetMap (Político)"
+]
+curr_base = st.session_state.get("map_base_type", "Google Satélite (Híbrido + Etiquetas)")
+base_idx = options_base.index(curr_base) if curr_base in options_base else 0
+
+input_map_base = st.sidebar.selectbox(
+    "Mapa Base Activo:",
+    options=options_base,
+    index=base_idx,
+    help="Selecciona el estilo de mapa base (Satélite HD con nombres de ciudades/carreteras, Satélite puro o Mapa Político)."
+)
+if input_map_base != st.session_state.get("map_base_type"):
+    st.session_state["map_base_type"] = input_map_base
+    st.rerun()
 
 
 # Carga de Cuenca y DEM
@@ -395,7 +457,8 @@ with tab0:
     st.subheader(f"📍 Selección Interactiva de Cuenca por Clic en Mapa (HydroSHEDS Nivel {nivel_hybas})")
     st.info(f"Haz clic en cualquier punto del mapa para interceptar la cuenca HydroSHEDS (Nivel {nivel_hybas}) correspondiente.")
 
-    m_select = folium.Map(location=[st.session_state["lat"], st.session_state["lon"]], zoom_start=9, tiles="OpenStreetMap")
+    m_select = folium.Map(location=[st.session_state["lat"], st.session_state["lon"]], zoom_start=9, tiles=None)
+    setup_map_layers(m_select)
 
     cuenca_fc = ee.FeatureCollection([cuenca_vector])
     add_ee_layer(m_select, ee.Image().paint(cuenca_fc, 0, 2), {'palette': 'blue'}, f'Cuenca HydroSHEDS L{nivel_hybas}')
@@ -446,14 +509,8 @@ with tab1:
     with ctrl_col2:
         opacity_precip = st.slider("🎛️ Opacidad Precipitación Promedio Anual", 0.0, 1.0, 0.65, 0.05, key="op_precip")
 
-    m = folium.Map(location=[st.session_state["lat"], st.session_state["lon"]], zoom_start=10, tiles="OpenStreetMap")
-
-    folium.TileLayer(
-        tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        attr='Esri World Imagery',
-        name='Esri Satélite',
-        overlay=False
-    ).add_to(m)
+    m = folium.Map(location=[st.session_state["lat"], st.session_state["lon"]], zoom_start=10, tiles=None)
+    setup_map_layers(m)
 
     dem_vis = {'min': 0, 'max': 2500, 'palette': ['006600', '002200', 'fff700', 'ab0000', 'b8b8b8', 'ffffff']}
     add_ee_layer(m, dem_cuenca, dem_vis, 'DEM de la Cuenca (SRTM 30m)', opacity=opacity_dem)
@@ -837,14 +894,8 @@ with tab3:
     idx_mapa = [row["Nombre"] for row in sat_results].index(dia_mapa_sel)
     data_mapa_sel = sat_results[idx_mapa]
 
-    m_sat = folium.Map(location=[st.session_state["lat"], st.session_state["lon"]], zoom_start=9, tiles="OpenStreetMap")
-    
-    folium.TileLayer(
-        tiles='https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-        attr='Esri World Imagery',
-        name='Esri Satélite',
-        overlay=False
-    ).add_to(m_sat)
+    m_sat = folium.Map(location=[st.session_state["lat"], st.session_state["lon"]], zoom_start=9, tiles=None)
+    setup_map_layers(m_sat)
 
     try:
         with rasterio.MemoryFile(data_mapa_sel["Bytes"]) as memfile_sat:

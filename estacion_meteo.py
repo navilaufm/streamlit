@@ -1107,7 +1107,7 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
             PLOTLY_CFG = {'displayModeBar': 'hover', 'responsive': True, 'scrollZoom': False}
 
             fig_fcst.update_layout(
-                title=dict(text="Evolución de Temperaturas y Lluvias (7 Días)", font=dict(size=14), x=0.0, xanchor="left"),
+                title=dict(text="Temperatura y Lluvia Próx. 7 Días", font=dict(size=14), x=0.0, y=1.0, xanchor="left"),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)",
                 hovermode="x unified",
