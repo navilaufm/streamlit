@@ -240,7 +240,72 @@ st.markdown("""
         margin-bottom: 24px;
     }
 
-    /* 5. Reglas Responsive para Dispositivos Móviles */
+    /* 5. Estilo Botón Píldora / Cápsula para Pestañas (st.tabs) */
+    [data-testid="stTabs"] [role="tablist"],
+    [data-testid="stTabs"] [data-baseweb="tab-list"] {
+        gap: 8px !important;
+        background-color: transparent !important;
+        border-bottom: none !important;
+        padding: 4px 0 10px 0 !important;
+    }
+
+    [data-testid="stTabs"] [role="tab"],
+    [data-testid="stTabs"] button[data-baseweb="tab"],
+    button[data-baseweb="tab"] {
+        background: linear-gradient(135deg, #1e222d 0%, #14171f 100%) !important;
+        color: #8f9ba8 !important;
+        border: 1.5px solid #2e3440 !important;
+        border-radius: 20px !important;
+        padding: 8px 18px !important;
+        font-weight: 600 !important;
+        font-size: 0.88rem !important;
+        transition: all 0.2s ease-in-out !important;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2) !important;
+    }
+
+    [data-testid="stTabs"] [role="tab"]:hover,
+    [data-testid="stTabs"] button[data-baseweb="tab"]:hover,
+    button[data-baseweb="tab"]:hover {
+        color: #00e5ff !important;
+        border-color: #00e5ff !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25) !important;
+    }
+
+    [data-testid="stTabs"] [role="tab"][aria-selected="true"],
+    [data-testid="stTabs"] button[data-baseweb="tab"][aria-selected="true"],
+    button[data-baseweb="tab"][aria-selected="true"] {
+        background: linear-gradient(135deg, rgba(0, 229, 255, 0.18) 0%, rgba(0, 229, 255, 0.05) 100%) !important;
+        color: #00e5ff !important;
+        border: 1.5px solid #00e5ff !important;
+        box-shadow: 0 4px 14px rgba(0, 229, 255, 0.35) !important;
+        font-weight: 700 !important;
+    }
+
+    /* Alineación de la línea indicadora activa en Cyan Neón (combina con el botón activo) */
+    [data-baseweb="tab-highlight"] {
+        background-color: #00e5ff !important;
+        height: 2px !important;
+        border-radius: 2px !important;
+    }
+
+    /* Reglas para Tema Claro en Pestañas */
+    [data-theme="light"] [role="tab"],
+    [data-theme="light"] button[data-baseweb="tab"], 
+    .stApp[data-theme="light"] button[data-baseweb="tab"] {
+        background: #ffffff !important;
+        color: #57606a !important;
+        border-color: #d0d7de !important;
+    }
+    [data-theme="light"] [role="tab"][aria-selected="true"],
+    [data-theme="light"] button[data-baseweb="tab"][aria-selected="true"],
+    .stApp[data-theme="light"] button[data-baseweb="tab"][aria-selected="true"] {
+        background: rgba(0, 229, 255, 0.12) !important;
+        color: #0088cc !important;
+        border-color: #0088cc !important;
+    }
+
+    /* 6. Reglas Responsive para Dispositivos Móviles */
     @media (max-width: 1024px) {
         .kpi-grid {
             grid-template-columns: repeat(3, 1fr) !important;
@@ -278,10 +343,11 @@ st.markdown("""
             margin-left: 0 !important;
             margin-right: 0 !important;
         }
+        [data-testid="stTabs"] [role="tab"],
         button[data-baseweb="tab"] {
-            padding-left: 6px !important;
-            padding-right: 6px !important;
-            font-size: 0.82rem !important;
+            padding: 6px 10px !important;
+            font-size: 0.80rem !important;
+            border-radius: 16px !important;
         }
         .forecast-card {
             padding: 16px 12px !important;
@@ -306,6 +372,28 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
+
+# --- CONTROL ADMINISTRADOR: OCULTAR/MOSTRAR BOTÓN DEPLOY ---
+is_admin = st.query_params.get("admin", "") == "1"
+
+if not is_admin:
+    st.markdown("""
+    <style>
+        /* Ocultar únicamente el botón Deploy para usuarios normales (mantiene el menú de 3 puntos) */
+        [data-testid="stDeploymentBadge"],
+        [data-testid="stAppDeployButton"],
+        .stDeployButton,
+        [data-testid="stHeaderActionElements"] button:first-child,
+        [data-testid="stHeaderActionElements"] iframe,
+        header [data-testid="stHeaderActionElements"] > div:first-child {
+            display: none !important;
+            visibility: hidden !important;
+            opacity: 0 !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- SISTEMA DE SESIÓN PERMANENTE VÍA COOKIES Y LOCALSTORAGE ---
 phone_from_query = st.query_params.get("phone", "")
@@ -957,14 +1045,14 @@ def render_dashboard(data_df, name, station_lat, station_lon, forecast, realtime
 
     st.markdown("<br>", unsafe_allow_html=True)
 
-    # --- PESTAÑAS DEL DASHBOARD ---
+    # --- PESTAÑAS DEL DASHBOARD (BOTONES TIPO PÍLDORA MINIMALISTAS) ---
     tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
-        "🔮 Pronóstico 7 Días",
-        "🌡️ Temperatura y Humedad",
-        "🚩 Dinámica del Viento",
-        "🌧️ Lluvia",
-        "☀️ Radiación Solar",
-        "🛩️ Barómetro (Presión)"
+        "📅 Pronóstico",
+        "🌡️ Temp / Hum",
+        "💨 Viento",
+        "🌧️ Precipitación",
+        "☀️ Radiación",
+        "📊 Presión"
     ])
 
     # PALETA DE COLORES
