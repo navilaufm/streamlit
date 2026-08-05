@@ -13,7 +13,7 @@ APP_ICON = "https://meteo.tech/favicon.ico"
 
 # Configuración de página de Streamlit
 st.set_page_config(
-    page_title="Estación Meteorológica - Meteo Tech",
+    page_title="Mis Estaciones",
     page_icon=APP_ICON,
     layout="wide",
     initial_sidebar_state="expanded"

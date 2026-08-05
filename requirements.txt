@@ -6,3 +6,4 @@ pandas
 plotly
 geemap
 rasterio
+matplotlib
