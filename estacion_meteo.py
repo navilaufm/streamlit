@@ -41,6 +41,48 @@ components.html("""
 </script>
 """, height=0, width=0)
 
+def render_pwa_sidebar_footer():
+    with st.sidebar:
+        st.divider()
+        components.html(
+            """
+            <button id="pwa-install-sidebar-btn" style="
+                width: 100%;
+                background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+                color: white;
+                padding: 10px 14px;
+                border: none;
+                border-radius: 8px;
+                font-weight: 600;
+                font-size: 13.5px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.25);
+                transition: all 0.2s ease;
+                font-family: system-ui, -apple-system, sans-serif;
+            ">
+                📲 Instalar App en Celular
+            </button>
+            <script>
+            document.getElementById('pwa-install-sidebar-btn').addEventListener('click', function() {
+                if (window.parent && window.parent.pwaPrompt) {
+                    window.parent.pwaPrompt.prompt();
+                } else if (window.parent && window.parent.triggerPwaInstall) {
+                    window.parent.triggerPwaInstall();
+                } else {
+                    window.parent.alert("📱 Para instalar la App Mis Estaciones:\\n\\n• En Android (Chrome): Abre el menú de 3 puntos (⋮) en la esquina superior derecha y toca 'Instalar aplicación'.\\n\\n• En iPhone (Safari): Toca el botón Compartir y elige 'Agregar a la pantalla de inicio'.");
+                }
+            });
+            </script>
+            """,
+            height=55
+        )
+
+
+
 # Estilos CSS adaptables que soportan TANTO Tema Oscuro (Dark) como Tema Claro (Light)
 st.markdown("""
 <style>
@@ -692,7 +734,7 @@ if not clean_phone:
         
         st.markdown("<br>", unsafe_allow_html=True)
         with st.form("login_form", clear_on_submit=False):
-            phone_input = st.text_input("📱 Número de Teléfono", placeholder="Ej: 50255261060")
+            phone_input = st.text_input("📱 Número de Teléfono (Sin espacios ni símbolos)", placeholder="50212345678")
             submit_btn = st.form_submit_button("🔑 Ingresar a mis Estaciones", use_container_width=True)
             
             if submit_btn:
@@ -703,7 +745,9 @@ if not clean_phone:
                     st.rerun()
                 else:
                     st.error("Por favor ingresa un número de teléfono válido.")
+    render_pwa_sidebar_footer()
     st.stop()
+
 
 # --- 2. CONSULTAR ESTACIONES ASOCIADAS AL TELÉFONO ---
 user_stations = fetch_stations_by_phone(clean_phone)
@@ -736,6 +780,8 @@ if not user_stations:
             del st.query_params["station_id"]
         components.html(js_clear_snippet, height=0, width=0)
         st.rerun()
+
+    render_pwa_sidebar_footer()
 
     col1, col2, col3 = st.columns([1, 2, 1])
     with col2:
@@ -869,6 +915,9 @@ st.sidebar.caption(f"Refrescando automáticamente cada {ref_mins} min.")
 if st.sidebar.button("🔄 Actualizar Datos Ahora", use_container_width=True):
     st.cache_data.clear()
     st.rerun()
+
+render_pwa_sidebar_footer()
+
 
 # --- CARGA DE DATOS DE LA ESTACIÓN SELECCIONADA (LECTURA ACTUAL /LAST + HISTÓRICO + PRONÓSTICO) ---
 latest_realtime, last_report_dt = fetch_latest_station_readings(station_id)
