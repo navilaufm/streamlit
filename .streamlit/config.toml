@@ -4,3 +4,9 @@ backgroundColor = "#0b121e"
 secondaryBackgroundColor = "#131e30"
 textColor = "#FFFFFF"
 font = "sans serif"
+
+[server]
+headless = true
+port = 8501
+baseUrlPath = "mis-estaciones"
+address = "127.0.0.1"

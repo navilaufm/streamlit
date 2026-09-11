@@ -25,22 +25,22 @@ st.set_page_config(
 
 @st.cache_resource
 def init_earth_engine():
-    key_file = os.path.join(os.path.dirname(__file__), "ee-cydata-745adb8aa872.json")
+    key_file = os.path.join(os.path.dirname(__file__), "ee-cydata-a4f71d1cb9dd.json")
     if not os.path.exists(key_file):
-        key_file = "ee-cydata-745adb8aa872.json"
+        key_file = "ee-cydata-a4f71d1cb9dd.json"
 
-    try:
+    if os.path.exists(key_file):
         credentials = ee.ServiceAccountCredentials(
             'service-ee-cydata@ee-cydata.iam.gserviceaccount.com',
             key_file
         )
         ee.Initialize(credentials, project='ee-cydata')
-    except Exception:
+    else:
         try:
             ee.Initialize(project='ee-cydata')
         except Exception:
-            ee.Authenticate()
-            ee.Initialize(project='ee-cydata')
+            st.error("No se encontró el archivo de credenciales de Service Account (ee-cydata-a4f71d1cb9dd.json). Por favor súbelo a la carpeta del proyecto.")
+            st.stop()
 
 init_earth_engine()
 
