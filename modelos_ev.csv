@@ -1,0 +1,20 @@
+Modelo,Marca,Segmento,Batería,Oficial (WLTP/CLTC),Consumo Real (kWh/100km),Costo 100km (Q)
+BYD Seagull (Dolphin Mini),BYD,Compacto / Urbano,30 - 38 kWh,9.6 - 10.5,12.0,18.12
+BYD Dolphin,BYD,Compacto / Urbano,45 - 60 kWh,15.2 - 15.9,15.5,23.41
+Volkswagen ID.3,Volkswagen,Compacto / Urbano,52 - 77 kWh,15.1 - 16.2,17.0,25.67
+MG4 Electric,MG,Compacto / Urbano,51 - 64 kWh,16.0 - 17.0,17.5,26.43
+Renault Kwid E-Tech,Renault,Compacto / Urbano,26.8 kWh,10.8 - 11.5,13.0,19.63
+Tesla Model 3 (Highland RWD),Tesla,Sedán,60 kWh,13.2,15.0,22.65
+Tesla Model 3 (Long Range),Tesla,Sedán,75 kWh,14.0,16.2,24.46
+BYD Seal,BYD,Sedán,82.5 kWh,16.6 - 18.2,18.5,27.94
+BMW i4 (eDrive40),BMW,Sedán,70 - 84 kWh,16.1 - 18.5,19.0,28.69
+BYD Atto 3 (Yuan Plus),BYD,SUV / Crossover,60.4 kWh,15.6 - 16.0,18.0,27.18
+Volvo EX30 (Single Motor),Volvo,SUV / Crossover,51 - 69 kWh,16.7 - 17.5,18.5,27.94
+Tesla Model Y (RWD),Tesla,SUV / Crossover,60 kWh,15.7,17.5,26.43
+Maxus Euniq 6 SUV,Maxus,SUV / Crossover,70 kWh,21.5,23.0,34.73
+Hyundai Ioniq 5,Hyundai,SUV / Crossover,58 - 77 kWh,16.7 - 18.0,19.0,28.69
+Geely EX5 / Geometry C,Geely,SUV / Crossover,53 - 70 kWh,16.5 - 17.5,18.5,27.94
+Maxus T90 EV (Pickup),Maxus,Pickup / Comercial,88.5 kWh,26.8,29.0,43.79
+Maxus Mifa 7 / Mifa 9,Maxus,Pickup / Comercial,90 kWh,20.5 - 21.5,24.5,37.0
+Riddara RD6 (Geely Radar),Riddara / Geely,Pickup / Comercial,63 - 86 kWh,19.5 - 21.5,24.0,36.24
+Ford F-150 Lightning,Ford,Pickup / Comercial,98 - 131 kWh,29.0 - 33.0,34.0,51.34

@@ -1,20 +1,21 @@
+import os
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-# Configuración inicial de la página (layout centered optimizado para móvil)
+# URL oficial del logo de AMEGUA
+LOGO_AMEGUA_URL = "https://images.squarespace-cdn.com/content/v1/5e83d5a6a631ec0bc312acae/356c4842-e22f-4676-af01-5bd222672807/logo+amegua+propuestas-01+copy.png"
+
+# Configuración inicial de la página con favicon oficial de AMEGUA
 st.set_page_config(
     page_title="AMEGUA | Calculadora EV", 
-    page_icon="⚡", 
+    page_icon=LOGO_AMEGUA_URL, 
     layout="centered",
     initial_sidebar_state="collapsed"
 )
 
-# URL oficial del logo de AMEGUA
-LOGO_AMEGUA_URL = "https://images.squarespace-cdn.com/content/v1/5e83d5a6a631ec0bc312acae/356c4842-e22f-4676-af01-5bd222672807/logo+amegua+propuestas-01+copy.png"
-
-# Estilos CSS optimizados: reducción de espacio superior y paleta oficial AMEGUA
+# Estilos CSS optimizados: reducción de espacio superior, paleta AMEGUA e iconografía limpia
 st.markdown("""
 <style>
     /* 1. ELIMINAR ESPACIO EN BLANCO SUPERIOR */
@@ -56,6 +57,10 @@ st.markdown("""
         font-weight: 700;
         color: #E0F2FE;
         margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
     }
     .hero-amount {
         font-size: 2.6rem;
@@ -98,13 +103,12 @@ st.markdown("""
         background-color: #78BE20 !important;
     }
 
-    /* Sliders (Elimina el rojo por completo) */
+    /* Sliders */
     div[data-baseweb="slider"] div[role="slider"] {
         background-color: #0066CC !important;
         border: 2px solid #78BE20 !important;
         box-shadow: 0 0 10px rgba(120, 190, 32, 0.7) !important;
     }
-    /* Relleno de la barra del slider */
     div[data-baseweb="slider"] > div > div:first-child {
         background: linear-gradient(90deg, #0047BA 0%, #0066CC 60%, #78BE20 100%) !important;
     }
@@ -113,7 +117,6 @@ st.markdown("""
     div[data-baseweb="slider"] div[style*="#FF4B4B"] {
         background-color: #0066CC !important;
     }
-    /* Texto con el valor numérico activo del slider */
     div[data-testid="stSlider"] div[data-baseweb="slider"] + div,
     div[data-testid="stSlider"] div[data-baseweb="slider"] span,
     div[data-testid="stSlider"] [data-testid="stMarkdownContainer"] p,
@@ -122,7 +125,7 @@ st.markdown("""
         font-weight: 700 !important;
     }
 
-    /* Segmented Controls (Botones de selección) */
+    /* Segmented Controls */
     div[data-testid="stSegmentedControl"] button[aria-checked="true"],
     div[data-testid="stSegmentedControl"] button[data-checked="true"],
     div[data-testid="stSegmentedControl"] [aria-pressed="true"] {
@@ -136,7 +139,7 @@ st.markdown("""
         color: #00D2FF !important;
     }
 
-    /* Toggles e Interruptores activos en Verde AMEGUA */
+    /* Toggles */
     div[data-testid="stCheckbox"] input:checked + div,
     div[data-testid="stToggle"] input:checked + div {
         background-color: #78BE20 !important;
@@ -172,29 +175,32 @@ with col_title:
 
 st.markdown("<div style='margin-bottom: 8px;'></div>", unsafe_allow_html=True)
 
-# Pestañas principales
-tab_calc, tab_modelos = st.tabs(["🧮 Calculadora de Ahorro", "📋 Consumos por Modelo (kWh/100km)"])
+# Pestañas principales con iconografía limpia
+tab_calc, tab_modelos = st.tabs([
+    ":material/calculate: Calculadora de Ahorro", 
+    ":material/table_chart: Consumos x Modelo (kWh/100km)"
+])
 
 # ==========================================
 # TAB 1: CALCULADORA DE AHORRO
 # ==========================================
 with tab_calc:
-    st.markdown("### 1. Datos de tu viaje")
+    st.markdown("### :material/tune: 1. Datos de tu viaje")
 
     # Preset de tipo de vehículo
     tipo_vehiculo = st.segmented_control(
-        "🚗 Tipo de vehículo:",
-        options=["Sedán / Compacto", "SUV / Camioneta", "Pickup / SUV Grande"],
+        ":material/directions_car: Tipo de vehículo:",
+        options=["Sedán", "SUV / Camioneta", "Pickup / SUV Grande"],
         default="SUV / Camioneta"
     )
 
     # Parámetros por defecto según tipo de auto
-    if tipo_vehiculo == "Sedán / Compacto":
+    if tipo_vehiculo == "Sedán":
         rendimiento_default = 40.0       # km/gal
         consumo_ev_default = 15.0        # kWh / 100 km
         precio_gas_auto_default = 150000
         precio_ev_auto_default = 195000
-    elif tipo_vehiculo == "Pickup / Grande":
+    elif tipo_vehiculo == "Pickup / SUV Grande":
         rendimiento_default = 25.0       # km/gal
         consumo_ev_default = 24.5        # kWh / 100 km
         precio_gas_auto_default = 240000
@@ -205,11 +211,11 @@ with tab_calc:
         precio_gas_auto_default = 190000
         precio_ev_auto_default = 240000
 
-    st.caption(f"💡 Referencia estimada: **{consumo_ev_default} kWh / 100 km** (EV) vs. **{rendimiento_default:.0f} km/gal** (Gasolina)")
+    st.caption(f"Referencia estimada: **{consumo_ev_default} kWh / 100 km** (EV) vs. **{rendimiento_default:.0f} km/gal** (Gasolina)")
 
     # Kilometraje diario
     km_dia = st.slider(
-        "🛣️ Kilómetros recorridos al día:", 
+        "Kilómetros recorridos al día:", 
         min_value=10, 
         max_value=200, 
         value=45, 
@@ -217,26 +223,26 @@ with tab_calc:
         help="Distancia total diaria que manejas entre ida, vuelta y diligencias."
     )
 
-    dias_al_mes = st.slider("📅 Días de uso al mes:", min_value=10, max_value=31, value=26)
+    dias_al_mes = st.slider("Días de uso al mes:", min_value=10, max_value=31, value=26)
     km_mes = km_dia * dias_al_mes
 
     # Lugar de carga
     lugar_carga = st.segmented_control(
-        "⚡ ¿Dónde recargarías?",
-        options=["Casa (Tarifa Central)", "Casa (Departamentos)", "Paneles Solares"],
-        default="Casa (Tarifa Central)",
+        ":material/ev_station: Lugar habitual de recarga:",
+        options=["Residencial (Centro)", "Residencial (Interior)", "Páneles"],
+        default="Residencial (Centro)",
         help="La tarifa residencial promedio en área central (EEGSA) es aprox Q1.51/kWh. Con paneles propios baja a ~Q0.40/kWh."
     )
 
-    if lugar_carga == "Paneles Solares":
+    if lugar_carga == "Páneles":
         precio_kwh_base = 0.40
-    elif lugar_carga == "Casa (Departamentos)":
+    elif lugar_carga == "Residencial (Interior)":
         precio_kwh_base = 2.10
     else:
         precio_kwh_base = 1.51
 
     # --- OPCIONES AVANZADAS ---
-    with st.expander("⚙️ Personalizar precios y detalles avanzados (Opcional)"):
+    with st.expander(":material/settings: Personalizar precios y detalles técnicos (Opcional)"):
         st.markdown("**Precios de Combustible y Electricidad**")
         col_av1, col_av2 = st.columns(2)
         with col_av1:
@@ -297,14 +303,17 @@ with tab_calc:
 
     # --- RESULTADOS HERO CARD (PALETA AMEGUA) ---
     st.markdown("---")
-    st.markdown("### 2. Tu Ahorro Estimado")
+    st.markdown("### :material/savings: 2. Tu Ahorro Estimado")
 
     st.markdown(f"""
     <div class="hero-card">
-        <div class="hero-title">⚡ Ahorro Mensual Proyectado</div>
+        <div class="hero-title">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+            Ahorro Mensual Proyectado
+        </div>
         <div class="hero-amount">Q {ahorro_mes:,.2f}</div>
         <div class="hero-subtitle">Equivale a <b>Q {ahorro_ano:,.0f} al año</b></div>
-        <div><span class="badge-amegua-green">🌱 {porcentaje_ahorro:.0f}% DE REDUCCIÓN EN GASTOS</span></div>
+        <div><span class="badge-amegua-green">{porcentaje_ahorro:.0f}% DE REDUCCIÓN EN GASTOS</span></div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -325,8 +334,8 @@ with tab_calc:
             delta_color="normal"
         )
 
-    # --- SECCIÓN DE GRÁFICAS (GRÁFICAS DE PIE / DONUT DE ALTO IMPACTO) ---
-    st.markdown("#### 🍩 ¿A dónde va tu dinero cada mes?")
+    # --- SECCIÓN DE GRÁFICAS ---
+    st.markdown("#### :material/donut_large: Distribución de Costos Mensuales")
 
     # Vista de selector de gráfico
     modo_grafica = st.segmented_control(
@@ -336,9 +345,9 @@ with tab_calc:
     )
 
     if modo_grafica == "Distribución del Ahorro":
-        # Gráfico Donut de Presupuesto: Muestra el Ahorro en Verde AMEGUA, Electricidad en Azul y Mant en Cyan
+        # Gráfico Donut de Presupuesto
         fig_donut = go.Figure(data=[go.Pie(
-            labels=["¡Tu Ahorro en el Bolsillo! 💰", "Gasto en Electricidad ⚡", "Mantenimiento EV 🔧"],
+            labels=["Ahorro Estimado", "Electricidad", "Mantenimiento EV"],
             values=[max(0, ahorro_mes), gasto_ev_mes, mant_ev_mes],
             hole=0.60,
             marker=dict(
@@ -372,7 +381,7 @@ with tab_calc:
         fig_duo = make_subplots(
             rows=1, cols=2, 
             specs=[[{'type': 'domain'}, {'type': 'domain'}]],
-            subplot_titles=[f"⛽ Gasolina (Q{total_gas_mes:,.0f}/m)", f"⚡ Eléctrico (Q{total_ev_mes:,.0f}/m)"]
+            subplot_titles=[f"Vehículo Gasolina (Q{total_gas_mes:,.0f}/m)", f"Vehículo Eléctrico (Q{total_ev_mes:,.0f}/m)"]
         )
 
         fig_duo.add_trace(go.Pie(
@@ -410,10 +419,10 @@ with tab_calc:
 
     with c_roi:
         with st.container(border=True):
-            st.markdown("⏱️ **Recuperación de Inversión**")
+            st.markdown("**:material/schedule: Recuperación de Inversión (ROI)**")
             diferencia_compra = precio_auto_ev - precio_auto_gas
             if diferencia_compra <= 0:
-                st.success("¡Inmediato! El auto eléctrico cuesta igual o menos.")
+                st.success("Inmediato: el vehículo eléctrico tiene un precio igual o menor.")
             elif ahorro_mes > 0:
                 meses_recuperacion = diferencia_compra / ahorro_mes
                 anos = int(meses_recuperacion // 12)
@@ -435,15 +444,15 @@ with tab_calc:
 
     with c_eco:
         with st.container(border=True):
-            st.markdown("🌱 **Impacto Ecológico**")
+            st.markdown("**:material/eco: Impacto Ambiental**")
             co2_gas = (galones_mes * 12) * 8.74
             co2_ev = (kwh_mes * 12) * 0.25
             co2_evitado = max(0, co2_gas - co2_ev)
             arboles = int(co2_evitado / 22)
-            st.success(f"Evitas **{co2_evitado:,.0f} kg de CO₂** al año. Equivale a sembrar **{arboles} árboles** 🌳.")
+            st.success(f"Evitas **{co2_evitado:,.0f} kg de CO₂** al año (equivalente a la absorción anual de **{arboles} árboles**).")
 
     # --- BENEFICIOS LEY GUATEMALA (AMEGUA / DECRETO 40-2022) ---
-    with st.expander("📜 Beneficios de la Ley de Movilidad Eléctrica (Decreto 40-2022)"):
+    with st.expander(":material/gavel: Beneficios de la Ley de Movilidad Eléctrica (Decreto 40-2022)"):
         st.markdown("""
         Promovida por el ecosistema de movilidad eléctrica en Guatemala e impulsada por **AMEGUA**:
         * **Exención de IPRIMA (100%):** Cero pago de impuesto de primera matrícula.
@@ -453,7 +462,7 @@ with tab_calc:
         """)
 
     # --- FUENTES Y DESGLOSE DE MANTENIMIENTO ---
-    with st.expander("🔧 Fuentes y desglose del costo de mantenimiento (Combustión vs EV)"):
+    with st.expander(":material/build: Fuentes y desglose del costo de mantenimiento (Combustión vs EV)"):
         st.markdown("""
         **¿Por qué un vehículo eléctrico gasta ~58% menos en taller?**
         
@@ -481,7 +490,7 @@ with tab_calc:
 # TAB 2: CATÁLOGO DE CONSUMOS POR MODELO
 # ==========================================
 with tab_modelos:
-    st.markdown("### 📋 Consumos de Referencia por Modelo")
+    st.markdown("### :material/table_chart: Consumos de Referencia por Modelo")
     st.caption("Valores oficiales homologados (WLTP/CLTC) y consumo real promedio con aire acondicionado y tráfico habitual.")
 
     # Base de datos de modelos populares
@@ -514,17 +523,36 @@ with tab_modelos:
         {"Modelo": "Ford F-150 Lightning", "Marca": "Ford", "Segmento": "Pickup / Comercial", "Batería": "98 - 131 kWh", "Oficial (WLTP/CLTC)": "29.0 - 33.0", "Consumo Real": 34.0, "Costo 100km (Q)*": 51.34}
     ]
 
-    df_ev = pd.DataFrame(datos_ev)
+    # Cargar datos desde archivo local si existe, o usar datos predeterminados
+    csv_path = os.path.join(os.path.dirname(__file__), "modelos_ev.csv")
+    if os.path.exists(csv_path):
+        try:
+            df_ev = pd.read_csv(csv_path)
+        except Exception:
+            df_ev = pd.DataFrame(datos_ev)
+    else:
+        df_ev = pd.DataFrame(datos_ev)
+
+    # Botón de descarga de archivo Excel
+    xlsx_path = os.path.join(os.path.dirname(__file__), "modelos_ev.xlsx")
+    if os.path.exists(xlsx_path):
+        with open(xlsx_path, "rb") as f_file:
+            st.download_button(
+                label=":material/download: Descargar catálogo en Excel (.xlsx)",
+                data=f_file,
+                file_name="modelos_ev_guatemala.xlsx",
+                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+            )
 
     # Filtros interactivos
     filtro_col1, filtro_col2 = st.columns([1, 1])
     with filtro_col1:
         categoria_sel = st.selectbox(
-            "Filtrar por categoría:", 
+            ":material/category: Filtrar por categoría:", 
             ["Todos", "Compacto / Urbano", "Sedán", "SUV / Crossover", "Pickup / Comercial"]
         )
     with filtro_col2:
-        busqueda = st.text_input("🔍 Buscar por nombre o marca:", placeholder="ej. Seagull, Tesla, Maxus...")
+        busqueda = st.text_input(":material/search: Buscar por nombre o marca:", placeholder="ej. Seagull, Tesla, Maxus...")
 
     # Aplicar filtros
     df_filtrado = df_ev.copy()
@@ -532,8 +560,8 @@ with tab_modelos:
         df_filtrado = df_filtrado[df_filtrado["Segmento"] == categoria_sel]
     if busqueda:
         df_filtrado = df_filtrado[
-            df_filtrado["Modelo"].str.contains(busqueda, case=False, na=False) |
-            df_filtrado["Marca"].str.contains(busqueda, case=False, na=False)
+            df_filtrado["Modelo"].astype(str).str.contains(busqueda, case=False, na=False) |
+            df_filtrado["Marca"].astype(str).str.contains(busqueda, case=False, na=False)
         ]
 
     # Mostrar tabla estilizada con encabezados en 2 filas para optimizar el ancho de columnas
@@ -554,14 +582,33 @@ with tab_modelos:
     """
     for idx, (_, row) in enumerate(df_filtrado.iterrows()):
         bg = "rgba(255,255,255,0.03)" if idx % 2 == 0 else "transparent"
+        consumo_val = row.get('Consumo Real') if 'Consumo Real' in row else row.get('Consumo Real (kWh/100km)', 0)
+        costo_val = row.get('Costo 100km (Q)*') if 'Costo 100km (Q)*' in row else row.get('Costo 100km (Q)', 0)
+        oficial_val = row.get('Oficial (WLTP/CLTC)', '')
+        bateria_val = row.get('Batería', '')
+        modelo_val = row.get('Modelo', '')
+        segmento_val = row.get('Segmento', '')
+
+        try:
+            consumo_num = float(consumo_val)
+            consumo_str = f"{consumo_num:.1f}"
+        except Exception:
+            consumo_str = str(consumo_val)
+
+        try:
+            costo_num = float(costo_val)
+            costo_str = f"Q {costo_num:.2f}"
+        except Exception:
+            costo_str = str(costo_val)
+
         html_table += f"""
             <tr style="background: {bg}; border-bottom: 1px solid rgba(125,125,125,0.12);">
-                <td style="padding: 8px 8px; font-weight: 600;">{row['Modelo']}</td>
-                <td style="padding: 8px 8px; opacity: 0.9;">{row['Segmento']}</td>
-                <td style="padding: 8px 8px; text-align: center;">{row['Batería']}</td>
-                <td style="padding: 8px 8px; text-align: center; opacity: 0.9;">{row['Oficial (WLTP/CLTC)']}</td>
-                <td style="padding: 8px 8px; text-align: center; font-weight: 700; color: #78BE20;">{row['Consumo Real']:.1f}</td>
-                <td style="padding: 8px 8px; text-align: right; font-weight: 600;">Q {row['Costo 100km (Q)*']:.2f}</td>
+                <td style="padding: 8px 8px; font-weight: 600;">{modelo_val}</td>
+                <td style="padding: 8px 8px; opacity: 0.9;">{segmento_val}</td>
+                <td style="padding: 8px 8px; text-align: center;">{bateria_val}</td>
+                <td style="padding: 8px 8px; text-align: center; opacity: 0.9;">{oficial_val}</td>
+                <td style="padding: 8px 8px; text-align: center; font-weight: 700; color: #78BE20;">{consumo_str}</td>
+                <td style="padding: 8px 8px; text-align: right; font-weight: 600;">{costo_str}</td>
             </tr>
         """
     html_table += """
@@ -571,14 +618,14 @@ with tab_modelos:
     """
     st.html(html_table)
 
-    st.caption("ℹ️ *Costo estimado por cada 100 km asumiendo tarifa residencial EEGSA promedio de **Q1.51 por kWh**.*")
+    st.caption("*Costo estimado por cada 100 km asumiendo tarifa residencial EEGSA promedio de Q1.51 por kWh.*")
 
     # Consejos de eficiencia para Guatemala
     with st.container(border=True):
-        st.markdown("💡 **Factores que influyen en el consumo en Guatemala:**")
+        st.markdown("**:material/lightbulb: Factores de eficiencia y consumo en Guatemala:**")
         st.markdown("""
-        * **Topografía y Subidas:** Subir hacia Carretera a El Salvador o Mixco incrementa el consumo instantáneo, pero las bajadas recuperan hasta un 30% de energía gracias al **freno regenerativo**.
-        * **Tráfico Urbano:** Al contrario de los autos de gasolina que gastan mucho en el tráfico, los EV gastan **muy poca energía detenidos** (solo el aire acondicionado).
-        * **Aire Acondicionado:** En clima cálido (costa / oriente) añade aprox. **1.5 a 2.5 kWh / 100 km**.
-        * **Velocidad en Carretera:** A más de 90 km/h la resistencia aerodinámica aumenta el consumo entre un 15% y 25%.
+        * **Topografía y Pendientes:** Subir hacia Carretera a El Salvador o Mixco incrementa el consumo instantáneo, pero las bajadas recuperan hasta un 30% de energía gracias al freno regenerativo.
+        * **Tráfico Urbano:** Al contrario de los autos de combustión que desperdician combustible en ralentí, los vehículos eléctricos consumen un mínimo de energía detenidos.
+        * **Aire Acondicionado:** En climas cálidos añade aproximadamente 1.5 a 2.5 kWh / 100 km al consumo general.
+        * **Velocidad en Carretera:** Por encima de 90 km/h la resistencia aerodinámica incrementa el consumo entre un 15% y 25%.
         """)
